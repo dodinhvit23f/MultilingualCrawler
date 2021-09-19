@@ -9,6 +9,17 @@ import random
 
 vector = dict()
 list_stopwords = list()
+
+
+def compareTitle(src_title, tgt_title):
+
+    count = 0
+    for word in src_title:
+        if (tgt_title.find(word) != -1):
+            count = count + 1
+
+    return (count / len(tgt_title))
+
 def loadStopWords():
     f = open("stopwords.txt", "r", encoding="utf-8")
     for line in f:
@@ -52,8 +63,6 @@ def cosineSinmilar(src_vector, tgt_vector):
     if x == 0:
         return 0
     return  x / y
-
-
 
 def wordToVector(word):
 
@@ -214,7 +223,7 @@ def preprocessString(list_dict_src):
 """
 Align News By Title And Date
 """
-def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_lim=0.4, score=0.8):
+def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_lim=0.4, score=0.8, token=True):
 
     for link in list_dict_src:
         src_datetime = datetime.datetime.strptime(link['date'], "%d/%m/%Y")
@@ -268,8 +277,10 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_l
                     start_tgt = start_tgt + 1
                     continue
                 # so sánh title
-
-                true_sore = TF_IDF(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
+                if(token):
+                    true_sore = TF_IDF(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
+                else:
+                    true_sore = compareTitle(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
 
                 if (max_ < true_sore):
                     max_ = true_sore
@@ -304,7 +315,7 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_l
         score = score - 0.1
     return list_align_title
 
-def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75):
+def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75, token = True):
 
     src = "vi"
     tgt = "other"
@@ -320,12 +331,6 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75):
     print(len(list_dict_src), len(list_dict_tgt))
     preprocessString(list_dict_src)
     preprocessString(list_dict_tgt)
-
-    #pdb.set_trace()
-    #list_dict_src.sort(key=lambda x: len(x.get('title').strip()))
-    #list_dict_tgt.sort(key=lambda x: len(x.get('title').strip()))
-    #list_dict_src.reverse()
-    #list_dict_tgt.reverse()
 
     list_align_title = list()
 
@@ -343,9 +348,11 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75):
 
             while (start_tgt < lim_tgt):
                 # so sánh title
-                true_sore = TF_IDF(list_dict_src[start_src]['words'],
+                if(token):
+                    true_sore = TF_IDF(list_dict_src[start_src]['words'],
                                                  list_dict_tgt[start_tgt]['words'])
-
+                else:
+                    true_sore = compareTitle(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
                 if (max_ < true_sore):
                     max_ = true_sore
                     true_tgt = start_tgt

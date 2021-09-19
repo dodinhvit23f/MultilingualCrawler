@@ -51,6 +51,15 @@ class BaseWebsite:
         if self.name == "NhanDan":
             return PageContent.getNhanDanNewsContent(html, language)
 
+    def bilingualNews(self, type, src_link, tgt_link):
+
+        if self.name == "Vov":
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, score_lim=0.06, score=0.8, token=False)
+        if (type == "date"):
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, score_lim=0.06, score=0.8)
+        if (type == "title"):
+            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, score_lim=0.06, score=0.8)
+
     def saveDocument(self, src_link, tgt_link, tgt_lang, document_folder):
         file_name = src_link.split("/")
         file_name = file_name[len(file_name) - 1]
@@ -140,7 +149,7 @@ class BaseWebsite:
             for line in array_link:
                 if line[1] != "" and line[1] != " ":
                     tgt_link = self.checkForLatestNews(line[1], tgt_link)
-            
+
 
         if src_link:
             SaveFile.saveJsonFile(
@@ -202,10 +211,9 @@ class BaseWebsite:
                     link["title"] = list_tgt_title[start][resource_lang]
                     del(list_tgt_title[start])
                     break
-        if (type == "date"):
-            pair_link = SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, score_lim=0.35, score=0.8)
-        if (type == "title"):
-            pair_link = SentenceAlign.AlignByTitleNews(src_link, tgt_link, score_lim=0.35, score=0.8)
+
+        pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link)
+
 
         if not os.path.exists(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang)):
             os.makedirs(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang))
