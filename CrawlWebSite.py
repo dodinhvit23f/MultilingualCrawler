@@ -51,14 +51,14 @@ class BaseWebsite:
         if self.name == "NhanDan":
             return PageContent.getNhanDanNewsContent(html, language)
 
-    def bilingualNews(self, type, src_link, tgt_link):
+    def bilingualNews(self, type, src_link, tgt_link, tgt):
 
         if self.name == "Vov":
-            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, score_lim=0.06, score=0.8, token=False)
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8, token=False)
         if (type == "date"):
-            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, score_lim=0.06, score=0.8)
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.06, score=0.8)
         if (type == "title"):
-            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, score_lim=0.06, score=0.8)
+            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, tgt=tgt, score_lim=0.06, score=0.8)
 
     def saveDocument(self, src_link, tgt_link, tgt_lang, document_folder):
         file_name = src_link.split("/")
@@ -142,14 +142,14 @@ class BaseWebsite:
                     os.makedirs(crawl_folder + "/link/{}/".format(resource_lang))
                 if not os.path.exists((crawl_folder + "/link/{}/".format(target_lang))):
                     os.makedirs(crawl_folder + "/link/{}/".format(target_lang))
-
+            """
             for line in array_link:
                 if line[0] != "" and line[0] != " ":
                     src_link = self.checkForLatestNews(line[0], src_link)
             for line in array_link:
                 if line[1] != "" and line[1] != " ":
                     tgt_link = self.checkForLatestNews(line[1], tgt_link)
-
+            """
 
         if src_link:
             SaveFile.saveJsonFile(
@@ -212,7 +212,7 @@ class BaseWebsite:
                     del(list_tgt_title[start])
                     break
 
-        pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link)
+        pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link, tgt=target_lang)
 
 
         if not os.path.exists(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang)):

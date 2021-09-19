@@ -202,7 +202,7 @@ def sentenceToTokenize(sentences):
 
     return tokenSentence.strip()
 
-def preprocessString(list_dict_src):
+def preprocessString(list_dict_src, token=True):
     start = 0
     length = len(list_dict_src)
 
@@ -214,7 +214,10 @@ def preprocessString(list_dict_src):
         sentence = re.sub("[!.,@#$%^&*()?<>“]+", "", sentence)
         sentence = re.sub("[-]+", " ", sentence)
         sentence = re.sub("\s+", " ", sentence)
-        sentence = sentenceToTokenize(sentence)
+
+        if(token):
+            sentence = sentenceToTokenize(sentence)
+
         sentence = sentence.lower()
         list_dict_src[start]['title'] = sentence
         list_dict_src[start]["words"] =  removeStopWord(sentence.split(" "))
@@ -223,7 +226,7 @@ def preprocessString(list_dict_src):
 """
 Align News By Title And Date
 """
-def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_lim=0.4, score=0.8, token=True):
+def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, score_lim=0.4, score=0.8, token=True):
 
     for link in list_dict_src:
         src_datetime = datetime.datetime.strptime(link['date'], "%d/%m/%Y")
@@ -233,15 +236,15 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_l
         tgt_datetime = datetime.datetime.strptime(link['date'], "%d/%m/%Y")
         link['date'] = tgt_datetime
 
-    preprocessString(list_dict_src)
-    preprocessString(list_dict_tgt)
+    preprocessString(list_dict_src, token=token)
+    preprocessString(list_dict_tgt, token=token)
 
     lim_src = len(list_dict_src)
     lim_tgt = len(list_dict_tgt)
 
     list_align_title = list()
     print(len(list_dict_src), len(list_dict_tgt))
-    while score > score_lim:
+    while score >= score_lim:
         print(score)
         start_src = 0
 
@@ -301,7 +304,7 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_l
                 f = open("thongke.csv", "a", encoding="utf-8")
                 f.write("{} \t {} \t {}\n".format(list_dict_src[start_src]['title'], list_dict_tgt[true_tgt]['title'], max_))
                 f.close()
-                list_align_title.append({"vi": list_dict_src[start_src]['url'], "other": list_dict_tgt[true_tgt]['url']})
+                list_align_title.append({"vi": list_dict_src[start_src]['url'], tgt: list_dict_tgt[true_tgt]['url']})
 
                 del (list_dict_src[start_src])
                 del (list_dict_tgt[true_tgt])
@@ -315,16 +318,18 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, date_range=20, score_l
         score = score - 0.1
     return list_align_title
 
-def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75, token = True):
+def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0.75, token = True):
 
     src = "vi"
-    tgt = "other"
+
     if(len(list_dict_src) > len(list_dict_tgt)):
         temp_list = list_dict_src.copy()
         list_dict_src = list_dict_tgt
         list_dict_tgt = temp_list
-        src = "other"
+        temp = tgt
         tgt = "vi"
+        src = temp
+
 
     lim_src = len(list_dict_src)
     lim_tgt = len(list_dict_tgt)
@@ -396,7 +401,7 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt, score_lim=0.35, score=0.75, t
 # annotator = VnCoreNLP("<FULL-PATH-to-VnCoreNLP-jar-file>", annotators="wseg", max_heap_size='-Xmx500m')
 loadVectorEmbbeding(vector)
 loadStopWords()
-annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
+#annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
 
 if __name__ == '__main__':
 
