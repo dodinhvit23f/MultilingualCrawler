@@ -52,11 +52,11 @@ class BaseWebsite:
             return PageContent.getNhanDanNewsContent(html, language)
 
     def bilingualNews(self, type, src_link, tgt_link, tgt):
-
+        print("sort data")
         self.sortBy(src_link, type)
         self.sortBy(tgt_link, type)
 
-
+        print("find bilingual")
         if (type == "date"):
             return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8)
         if (type == "title"):
