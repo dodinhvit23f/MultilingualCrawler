@@ -58,7 +58,9 @@ def parse_arguments(argv):
     return parser.parse_args(argv)
 
 # python AutoCrawlData.py -web vietnamplus -tgt_lang lo
+# python AutoCrawlData.py -web vov -tgt_lang lo
 if __name__ == '__main__':
+
     parser = parse_arguments(sys.argv[1:])
 
     if parser.web == "vov":
@@ -76,3 +78,4 @@ if __name__ == '__main__':
     if parser.web == "qdnd":
         web = QuanDoiNhanDanWeb("QDND", "QDNDCrawler", ["lo", "vi", "zh", "en"])
         web.auto_crawl_website(parser.tgt_lang, type="title")
+

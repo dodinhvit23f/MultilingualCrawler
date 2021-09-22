@@ -53,12 +53,14 @@ class BaseWebsite:
 
     def bilingualNews(self, type, src_link, tgt_link, tgt):
 
-        if self.name == "Vov":
-            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8, token=False)
+        self.sortBy(src_link, type)
+        self.sortBy(tgt_link, type)
+
+
         if (type == "date"):
-            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.06, score=0.8)
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8)
         if (type == "title"):
-            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, tgt=tgt, score_lim=0.06, score=0.8)
+            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8)
 
     def saveDocument(self, src_link, tgt_link, tgt_lang, document_folder):
         file_name = src_link.split("/")
@@ -72,11 +74,17 @@ class BaseWebsite:
         SaveFile.saveDocument(src_text=src_document, tgt_text=tgt_document, file_path=os.path.join(document_folder, file_name), src_lang_="vi",
                               tgt_lang_=tgt_lang)
 
-    def sortBy(self, type, lict_dict):
+    def sortBy(self, lict_dict, type="date"):
+        """
+        Sort list of dictionary by title or time
+        :param lict_dict:
+        :param type:
+        :return: None
+        """
         if (type == "date"):
-            lict_dict.sort(key=lambda x: datetime.datetime.strptime(x.get('date'), "%d/%m/%Y"))
+            lict_dict.sort(key=lambda x: datetime.datetime.strptime(x.get('date'), "%d/%m/%Y"),reverse=True)
         if (type == "title"):
-            lict_dict.sort(key=lambda x: len(x.get('title').strip()))
+            lict_dict.sort(key=lambda x: len(x.get('title').strip()),reverse=True)
             lict_dict.reverse()
 
     def auto_crawl_website(self, target_lang, type="date"):
@@ -219,6 +227,6 @@ class BaseWebsite:
             os.makedirs(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang))
 
         SaveFile.saveJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang), pair_link)
-
+        pdb.set_trace()
         for link in pair_link:
             self.saveDocument( link[resource_lang], link[target_lang], target_lang, document_folder)

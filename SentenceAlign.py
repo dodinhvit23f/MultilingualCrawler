@@ -6,16 +6,16 @@ import numpy as np
 import math
 import datetime
 import random
+import sys
 
 vector = dict()
 list_stopwords = list()
-
 
 def compareTitle(src_title, tgt_title):
 
     count = 0
     for word in src_title:
-        if (tgt_title.find(word) != -1):
+        if (word in tgt_title):
             count = count + 1
 
     return (count / len(tgt_title))
@@ -217,17 +217,30 @@ def preprocessString(list_dict_src, token=True):
 
         if(token):
             sentence = sentenceToTokenize(sentence)
-
         sentence = sentence.lower()
         list_dict_src[start]['title'] = sentence
-        list_dict_src[start]["words"] =  removeStopWord(sentence.split(" "))
+        if (token):
+            list_dict_src[start]["words"] =  removeStopWord(sentence.split(" "))
+        else:
+            list_dict_src[start]["words"] = sentence.split(" ")
         start = start + 1
 
 """
 Align News By Title And Date
 """
 def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, score_lim=0.4, score=0.8, token=True):
+    """
 
+    :param list_dict_src: danh sách các dictionary chứa link, date, title ngôn ngữ nguồn
+    :param list_dict_tgt: danh sách các dictionary chứa link, date, title ngôn ngữ đích được dịch sang ngôn ngữ nguồn
+    :param tgt: ngôn ngữ đích
+    :param date_range: giới hạn thời gian
+    :param score_lim: ngưỡng thấp nhất có thể lấy
+    :param score: ngưỡng bắt đầu
+    :param token: có token các
+    :return:
+
+    """
     for link in list_dict_src:
         src_datetime = datetime.datetime.strptime(link['date'], "%d/%m/%Y")
         link['date'] = src_datetime
@@ -249,37 +262,27 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
         start_src = 0
 
         checkPoint = 0
-
+        time = - date_range
         while (start_src < lim_src):
             max_ = 0
             start_tgt = checkPoint
             true_tgt = 0
-            # print(start_tgt)
+            print(start_tgt)
 
             while (start_tgt < lim_tgt):
 
                 delta = list_dict_src[start_src]['date'] - list_dict_tgt[start_tgt]['date']
-                # thoi gian vuot qua khoang 15 ngay
+                # thoi gian vuot qua khoang date_range
 
-                if (abs(delta.days) > date_range):
-                    """
-                    if(delta.days < 0 and score < 0.6):
-                        del (list_dict_tgt[start_tgt])
-                        lim_tgt = len(list_dict_tgt)
-                        continue
-                    """
-                    # luu lai vi tri ngay
-                    #
-                    if (delta.days < -1 and delta.days > -20):
+                if(abs(delta.days) > date_range):
+
+                    if delta.days < 0 and time > delta.days:
+                        time = delta.days
                         checkPoint = start_tgt
-
-                    # ngay thoi gian nguon lon hon
-                    if (delta.days > date_range):
-                        break
 
                     start_tgt = start_tgt + 1
                     continue
-                # so sánh title
+
                 if(token):
                     true_sore = TF_IDF(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
                 else:
@@ -401,7 +404,7 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0
 # annotator = VnCoreNLP("<FULL-PATH-to-VnCoreNLP-jar-file>", annotators="wseg", max_heap_size='-Xmx500m')
 loadVectorEmbbeding(vector)
 loadStopWords()
-#annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
+annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
 
 if __name__ == '__main__':
 

@@ -83,8 +83,8 @@ def getVovParagragh(driver, url, tag_time="time"):
             list_time.append(time_.text)
         source = driver.page_source
     except:
-        return (None, None)
-    return (list_time, source)
+         return None
+    return  source
 
 
 def getVovLink(link, list_=list()):
@@ -104,10 +104,10 @@ def getVovLink(link, list_=list()):
 
     while (index > 0):
         print(index)
+        pdb.set_trace()
+        html = getVovParagragh(driver, url="{}{}".format(link, index))
 
-        times, html = getVovParagragh(driver, url="{}{}".format(link, index))
-
-        if not times and not html:
+        if not html:
             break
 
         soup = BeautifulSoup(html, "lxml")
@@ -127,7 +127,6 @@ def getVovLink(link, list_=list()):
 
                 if (paragraph.h2.a.attrs['href'] != None):
                     hadIt = False
-                    datetime = times[index_time]
                     # print("Kiểm tra link trùng")
                     # pdb.set_trace()
                     for link_dict in list_:
@@ -140,7 +139,7 @@ def getVovLink(link, list_=list()):
                         index = - 1
                         break
 
-                    datetime = times[index_time]
+                    datetime = paragraph.time.text
 
                     titile = paragraph.h2.text.replace("\n", "").replace("\s+", "").strip()
 
@@ -154,7 +153,8 @@ def getVovLink(link, list_=list()):
 
                         index_time = index_time + 1
                     continue
-
+                else:
+                    print("khong co duong dan: "+paragraph.h2.text.replace("\n", "").replace("\s+", "").strip())
         index = index + 1
 
     driver.close()
