@@ -275,13 +275,11 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
                 # thoi gian vuot qua khoang date_range
 
                 if(abs(delta.days) > date_range):
+                        break
 
-                    if delta.days < 0 and time > delta.days:
-                        time = delta.days
-                        checkPoint = start_tgt
-
-                    start_tgt = start_tgt + 1
-                    continue
+                if delta.days < 0 and time > delta.days:
+                    time = delta.days
+                    checkPoint = start_tgt
 
                 if(token):
                     true_sore = TF_IDF(list_dict_src[start_src]["words"], list_dict_tgt[start_tgt]['words'])
