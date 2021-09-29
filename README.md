@@ -13,7 +13,7 @@ For each website News you have 1 Folder, it contains link of categories manually
 
 As you know news has **title and date (some not in numeric format)**. Beacause news is very lagre resource so compare them is very time consuming. So we set ***date range*** around 15 days or 1 month. It reduce a lot of unnecessary canculating. With title we **translate it from Machine translation** (googleApi etc) to translate it to **Vietnamese**. After that titles will be tokenize by **VNCoreNLP** then use **TF-IDF** and **stop words** to remove words has no meaning like và ( and), or (hoặc), về (about) etc then compare titles similar or not.
 
-> **Our Result**
+> **TF-IDF & Stop Words Results**
 
 Origin title | Translated title | Score |
 --- | --- | --- |
@@ -21,7 +21,13 @@ chủ_tịch quốc_hội lào đánh_giá cao các sáng_kiến và đề_xuấ
 chuyển_đổi số : động_lực phát_triển |chuyển_đổi sang kỹ_thuật_số : động_lực để phát_triển| 0.8179
 quan_hệ nga mỹ : nhân_tố duy_trì sự ổn_định chiến_lược | quan_hệ nga mỹ : ổn_định chiến_lược| 0.7676183059241082
 giá_trị của tư_tưởng hồ_chí_minh về chủ_nghĩa_xã_hội và con đường đi lên chủ_nghĩa_xã_hội ở việt_nam | những giá_trị của quan_niệm hồ_chí_minh về chủ_nghĩa_xã_hội và con đường đi lên chủ_nghĩa_xã_hội ở việt_nam | 0.7612
+cộng_đồng quốc_tế ủng_hộ các giải_pháp của việt_nam trong vấn_đề biển đông 	| cộng_đồng quốc_tế ủng_hộ các biện_pháp của việt_nam trong vấn_đề biển đông 	| 0.7612
 
+Our solution working prety well on finding bilingual news but there are many shortcomings, that I'll describe at below
 
+> **Problem**
+  
+  **Machine Translation Tool**
 
+  **Similar meaning words**
 
