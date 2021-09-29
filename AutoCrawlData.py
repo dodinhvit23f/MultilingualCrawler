@@ -57,7 +57,7 @@ def parse_arguments(argv):
     parser.add_argument('-lim_sorce', type=str, help='Source Language.', default="lo")
     return parser.parse_args(argv)
 
-# python AutoCrawlData.py -web vietnamplus -tgt_lang lo
+# python AutoCrawlData.py -web vietlao -tgt_lang lo
 # python AutoCrawlData.py -web vov -tgt_lang lo
 if __name__ == '__main__':
 

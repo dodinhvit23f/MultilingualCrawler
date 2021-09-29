@@ -251,10 +251,10 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
 
     preprocessString(list_dict_src, token=token)
     preprocessString(list_dict_tgt, token=token)
-
+    print("Preprocessing title new")
     lim_src = len(list_dict_src)
     lim_tgt = len(list_dict_tgt)
-
+    print("Start aligning title from ", len(list_dict_src), len(list_dict_tgt))
     list_align_title = list()
     print(len(list_dict_src), len(list_dict_tgt))
     while score >= score_lim:
@@ -267,7 +267,6 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
             max_ = 0
             start_tgt = checkPoint
             true_tgt = 0
-            print(start_tgt)
 
             while (start_tgt < lim_tgt):
 
@@ -275,9 +274,14 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
                 # thoi gian vuot qua khoang date_range
 
                 if(abs(delta.days) > date_range):
+                    if delta.days > 0:
                         break
+                    if delta.days < 0:
+                        start_tgt = start_tgt + 1
+                        continue
 
                 if delta.days < 0 and time > delta.days:
+
                     time = delta.days
                     checkPoint = start_tgt
 
@@ -407,12 +411,12 @@ annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ne
 if __name__ == '__main__':
 
     # Input
-    text_origin = "việt_nam hợp_tác hàn_quốc"
-    text_trans = "việt_nam hợp_tác lào"
+    text_origin = "26 năm Việt Nam đồng hành và phát triển cùng cộng đồng ASEAN"
+    text_trans = "26 năm Việt Nam đồng hành và phát triển cùng cộng đồng ASEAN"
     # To perform word segmentation, POS tagging, NER and then dependency parsing
     #annotated_text = annotator.annotate(text)
     #print(sentenceToTokenize(text_trans).split(" "))
     #print(sentenceToTokenize(text_origin).split(" "))
-    print(removeStopWord(text_trans.split(" ")))
-    print(removeStopWord(text_origin.split(" ")))
-    print(TF_IDF(removeStopWord(text_trans.split(" ")), removeStopWord(text_origin.split(" "))))
+    print(removeStopWord(sentenceToTokenize(text_trans).split(" ")))
+    print(removeStopWord(sentenceToTokenize(text_origin).split(" ")))
+    print(TF_IDF(removeStopWord(sentenceToTokenize(text_trans).split(" ")), removeStopWord(sentenceToTokenize(text_origin).split(" "))))

@@ -36,13 +36,11 @@ def saveDocument (src_text, tgt_text, file_path, src_lang_, tgt_lang_):
 
     if src_text and tgt_text:
         f = open(file_path + ".{}.txt".format(src_lang_), "w", encoding='utf-8')
-        for line in src_text:
-            f.write(line + "\n")
+        f.write(src_text + "\n")
         f.close()
 
         f = open(file_path + ".{}.txt".format(tgt_lang_), "w", encoding='utf-8')
-        for line in tgt_text:
-            f.write(line + "\n")
+        f.write(tgt_text + "\n")
         f.close()
     return
 

@@ -134,6 +134,7 @@ def slpit_text(text, list_sign):
         text = slipt_with_sign(text, sign)
 
     text = Utility.formatDocumentWithComma(text, list_sign[0])
+
     #pdb.set_trace()
     return text
 

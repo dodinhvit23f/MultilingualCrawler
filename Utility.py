@@ -81,7 +81,10 @@ def formatSentence(text):
     text = re.sub("", "", text)
     text = re.sub("\t+", " ", text)
     text = re.sub(' +', " ", text)
-
+    text = re.sub("[\n]+?[ ]+?[\n]+", "\n", text)
+    # trường hợp trên đáng ra phải bao quá hết cả ở dưới nhưng vì 1 lý do nào đó mà không có tác dụng
+    text = re.sub("[\n]+?[ ]+", "\n", text)
+    text = re.sub("[\n]+", "\n", text)
     return text
 
 def formatDocumentWithComma(text, comma):

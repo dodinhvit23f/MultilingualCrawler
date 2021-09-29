@@ -9,6 +9,7 @@ import SentenceAlign
 import requests
 import datetime
 
+import SeparateDocumentToSentences
 import Utility
 
 
@@ -65,12 +66,21 @@ class BaseWebsite:
     def saveDocument(self, src_link, tgt_link, tgt_lang, document_folder):
         file_name = src_link.split("/")
         file_name = file_name[len(file_name) - 1]
+        file_name = file_name[int(len(file_name)/2):]
+
         if os.path.isfile(os.path.join(document_folder, file_name+".{}.txt".format("vi"))):
             return
 
         src_document = self.getNewsContent(src_link, language="vi")
         tgt_document = self.getNewsContent(tgt_link, language=tgt_lang)
+        vi_punctuation = list(Punctuation.getPunctuationForLanguage("en").keys())
 
+        src_document = Utility.formatSentence(src_document)
+        tgt_document = Utility.formatSentence(tgt_document)
+
+        src_document = SeparateDocumentToSentences.slpit_text(src_document,vi_punctuation)
+
+        print(file_name)
         SaveFile.saveDocument(src_text=src_document, tgt_text=tgt_document, file_path=os.path.join(document_folder, file_name), src_lang_="vi",
                               tgt_lang_=tgt_lang)
 
@@ -219,14 +229,16 @@ class BaseWebsite:
                     link["title"] = list_tgt_title[start][resource_lang]
                     del(list_tgt_title[start])
                     break
-
+        """
         pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link, tgt=target_lang)
-
+        """
 
         if not os.path.exists(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang)):
             os.makedirs(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang))
-
+        
         SaveFile.saveJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang), pair_link)
-        pdb.set_trace()
+
+        pair_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang))
+
         for link in pair_link:
             self.saveDocument( link[resource_lang], link[target_lang], target_lang, document_folder)
