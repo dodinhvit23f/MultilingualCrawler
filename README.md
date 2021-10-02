@@ -15,8 +15,34 @@ As you know news has **title and date (some not in numeric format)**. Beacause n
 
 > **TF-IDF & Stop Words Results**
 
+**Bag of words**
+
+chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
+--- | --- | --- | --- | --- |
+2 | 1 | 2 | 2 | 1 |
+
+**Origin bag of words**
+
+chuyển_đổi| động_lực | phát_triển| số |
+--- | --- | --- | --- |
+2 | 2 | 2 | 1 |
+
+**Translated bag of words**
+
+chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển|
+--- | --- | --- | --- |
+2 | 1 | 2 | 2 |
+
+**TF-IDF Vector** 
+
+Text |chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
+--- |--- | --- | --- | --- | --- |
+Origin | 1| -1 | 2 | 2 | 0.30 |
+Translated | 1 | 0.30 | 2 | 2 | -1 |
+
+
 Origin title | Translated title | Score |
---- | --- | --- |
+--- | --- | --- | 
 chủ_tịch quốc_hội lào đánh_giá cao các sáng_kiến và đề_xuất của việt_nam tại aipa 42  | chủ_tịch quốc_hội lào biểu_dương các sáng_kiến và đề_xuất của việt_nam tại aipa 42 | 0.9022|
 chuyển_đổi số : động_lực phát_triển |chuyển_đổi sang kỹ_thuật_số : động_lực để phát_triển| 0.8179
 quan_hệ nga mỹ : nhân_tố duy_trì sự ổn_định chiến_lược | quan_hệ nga mỹ : ổn_định chiến_lược| 0.7676183059241082
