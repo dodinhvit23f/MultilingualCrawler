@@ -17,17 +17,21 @@ As you know news has **title and date (some not in numeric format)**. Beacause n
 
 **Bag of words**
 
+S1: “chuyển_đổi số : động_lực phát_triển”
+
+S2: “chuyển_đổi sang kỹ_thuật_số : động_lực để phát_triển”
+
 chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
 --- | --- | --- | --- | --- |
 2 | 1 | 2 | 2 | 1 |
 
-**Origin bag of words**
+**S1 bag of words**
 
 chuyển_đổi| động_lực | phát_triển| số |
 --- | --- | --- | --- |
 2 | 2 | 2 | 1 |
 
-**Translated bag of words**
+**S2 bag of words**
 
 chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển|
 --- | --- | --- | --- |
@@ -37,17 +41,17 @@ chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển|
 
 Text |chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
 --- |--- | --- | --- | --- | --- |
-Origin | 1| -1 | 2 | 2 | 0.30 |
-Translated | 1 | 0.30 | 2 | 2 | -1 |
+S1 | 1| -1 | 1 | 1 | 0.30 |
+S2 | 1 | 0.30 | 1 | 1 | -1 |
 
 
 Origin title | Translated title | Score |
 --- | --- | --- | 
 chủ_tịch quốc_hội lào đánh_giá cao các sáng_kiến và đề_xuất của việt_nam tại aipa 42  | chủ_tịch quốc_hội lào biểu_dương các sáng_kiến và đề_xuất của việt_nam tại aipa 42 | 0.9022|
-chuyển_đổi số : động_lực phát_triển |chuyển_đổi sang kỹ_thuật_số : động_lực để phát_triển| 0.8179
 quan_hệ nga mỹ : nhân_tố duy_trì sự ổn_định chiến_lược | quan_hệ nga mỹ : ổn_định chiến_lược| 0.7676183059241082
 giá_trị của tư_tưởng hồ_chí_minh về chủ_nghĩa_xã_hội và con đường đi lên chủ_nghĩa_xã_hội ở việt_nam | những giá_trị của quan_niệm hồ_chí_minh về chủ_nghĩa_xã_hội và con đường đi lên chủ_nghĩa_xã_hội ở việt_nam | 0.7612
 cộng_đồng quốc_tế ủng_hộ các giải_pháp của việt_nam trong vấn_đề biển đông 	| cộng_đồng quốc_tế ủng_hộ các biện_pháp của việt_nam trong vấn_đề biển đông 	| 0.7612
+chuyển_đổi số : động_lực phát_triển |chuyển_đổi sang kỹ_thuật_số : động_lực để phát_triển| 0.7425
 
 Our solution working prety well on finding bilingual news but there are many shortcomings, that I'll describe at below
 
@@ -55,5 +59,12 @@ Our solution working prety well on finding bilingual news but there are many sho
   
   **Machine Translation Tool**
 
-  **Similar meaning words**
-
+  **Similar meaning words and TF-IDF **
+  
+  Origin title | Translated title | Bilingual |
+--- | --- | --- |
+ tiếp đà tăng_trưởng của 2017 | tiếp_tục sự tăng_trưởng của năm 2017 | True
+ lễ hồi_hương đưa_tiễn hài_cốt quân_tình_nguyện và chuyên_gia việt_nam hy_sinh tại lào |  lễ viếng 25 chuyên_gia quân_nhân việt_nam hy_sinh tại lào| True
+ hội_thảo hệ_thống phát_triển liên_hợp_quốc và quan_hệ với việt_nam | hội_thảo quan_hệ nga asean vai_trò của việt_nam tại liên_bang nga | False
+ khai_mạc hội_nghị bộ_trưởng kinh_tế asean lần thứ 51  | hội_nghị bộ_trưởng năng_lượng asean lần thứ 37 	 0.26186536852924336 | False
+  
