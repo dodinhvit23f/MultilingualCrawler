@@ -8,7 +8,7 @@ import SaveFile
 import SentenceAlign
 import requests
 import datetime
-
+import AlignmentNews
 import SeparateDocumentToSentences
 import Utility
 
@@ -73,12 +73,14 @@ class BaseWebsite:
 
         src_document = self.getNewsContent(src_link, language="vi")
         tgt_document = self.getNewsContent(tgt_link, language=tgt_lang)
+
         vi_punctuation = list(Punctuation.getPunctuationForLanguage("en").keys())
 
         src_document = Utility.formatSentence(src_document)
         tgt_document = Utility.formatSentence(tgt_document)
 
         src_document = SeparateDocumentToSentences.slpit_text(src_document,vi_punctuation)
+        tgt_document = AlignmentNews.sentencesSegmentation(tgt_document, tgt_lang)
 
         print(file_name)
         SaveFile.saveDocument(src_text=src_document, tgt_text=tgt_document, file_path=os.path.join(document_folder, file_name), src_lang_="vi",
@@ -106,8 +108,8 @@ class BaseWebsite:
         map_punctuation = Punctuation.getPunctuationForLanguage(target_lang)
         _case = {"TH1": 0, "TH2": 1}
 
-        sentence_folder = current_dir + "/Data/crawler_success/{}/Sentence/".format(self.name)
-        document_folder = current_dir + "/Data/crawler_success/{}/Document/".format(self.name)
+        sentence_folder = current_dir + "/Data/crawler_success/{}/{}-{}/Sentence/".format(self.name, resource_lang,target_lang)
+        document_folder = current_dir + "/Data/crawler_success/{}/{}-{}/Document/".format(self.name, resource_lang,target_lang)
 
         output_dir_success = [sentence_folder, document_folder]
 
@@ -235,9 +237,9 @@ class BaseWebsite:
 
         if not os.path.exists(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang)):
             os.makedirs(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang))
-        
+        """
         SaveFile.saveJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang), pair_link)
-
+        """
         pair_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang))
 
         for link in pair_link:

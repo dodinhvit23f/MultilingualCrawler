@@ -1,19 +1,11 @@
-import os
 import pdb
-import re
 import time
-import traceback
 import urllib
-from datetime import datetime
-
 from multipledispatch import dispatch
 from selenium.webdriver.support.ui import WebDriverWait
-import SentenceAlign
 import ChromeDriver
-
 import Utility
-
-
+import configparser
 @dispatch(str, str, list)
 def translate(src_lang, tgt_lang, list_text):
     list_transed_text = list()
@@ -65,37 +57,38 @@ def translate(src_lang, tgt_lang, list_text):
 
     return list_transed_text
 
-
 import requests
 
+config = configparser.RawConfigParser()
+config.read('Api.properties')
 
-def vizhApi(src_source, tgt_source):
-    url = "http://nmtuet.ddns.net:9977/sentences_align"
-
-    payload = Utility.objectToJson({"type": "vi-lo",
+def sentencesAlignment(src_source, tgt_source, tgt_lang):
+    global  config
+    payload = Utility.objectToJson({"type": config.get(tgt_lang, 'api.type'),
                                     "source": src_source,
                                     "target": tgt_source})
-
     headers = {
         'Content-Type': 'application/json'
     }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-
+    response = requests.request("POST",  config.get(tgt_lang,'api.url'), headers=headers, data=payload.encode("utf-8"))
     print(response.text)
+    data = Utility.stringJsonToOject(response.text)
+    for x in data['data']:
+        print(x)
 
 
-def viloApi(src_source, tgt_source):
-    url = "http://nmtuet.ddns.net:9988/scores/sentences"
+def sentencesSegmentation(src_source, tgt_lang):
+    global  config
 
-    payload = Utility.objectToJson({"type": "vi-lo",
-                                    "source": src_source,
-                                    "target": tgt_source})
+    payload = Utility.objectToJson({"type":tgt_lang,
+                                    "source": src_source})
+    headers = { 'Content-type': 'application/json; charset=utf-8'}
 
-    headers = {
-        'Content-Type': 'application/json'
-    }
+    response = requests.request("POST",  config.get('segmentation','api.url'), headers=headers, data=payload.encode("utf-8"))
+    try:
+        data = Utility.stringJsonToOject(response.text)
+    except:
+        return src_source
+    return data['data']
 
-    response = requests.request("POST", url, headers=headers, data=payload)
-
-    print(response.text)
+#sentencesAlignment("kiểm tra", "ກວດສອບ", "lo")
