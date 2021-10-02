@@ -63,7 +63,7 @@ Our solution working prety well on finding bilingual news but there are many sho
   
   Origin title | Translated title | Bilingual |
 --- | --- | --- |
- tiếp đà tăng_trưởng của 2017 | tiếp_tục sự tăng_trưởng của năm 2017 | True
+ khai_mạc ngày hội giao_lưu văn_hoá thể_thao và du_lịch các dân_tộc_thiểu_số các tỉnh vùng biên_giới việt_nam lào  | vovworld_các tỉnh biên_giới việt_lào đã thống_nhất giao_lưu văn_hoá thể_thao và du_lịch với đồng_bào các dân_tộc | True
  lễ hồi_hương đưa_tiễn hài_cốt quân_tình_nguyện và chuyên_gia việt_nam hy_sinh tại lào |  lễ viếng 25 chuyên_gia quân_nhân việt_nam hy_sinh tại lào| True
  hội_thảo hệ_thống phát_triển liên_hợp_quốc và quan_hệ với việt_nam | hội_thảo quan_hệ nga asean vai_trò của việt_nam tại liên_bang nga | False
  khai_mạc hội_nghị bộ_trưởng kinh_tế asean lần thứ 51  | hội_nghị bộ_trưởng năng_lượng asean lần thứ 37| False
