@@ -1,4 +1,4 @@
-# Multilingual Web Crawler
+# Paracrawl
 Crawl Multi Language News Website Content like VovWorld, VNAnet, VietNamPlus, QuanDoiNhanDan etc
 
 This tools made by me with help of instructors **DR. Tran Hong Viet** (thviet79) and **masters Bui Van Tan**
