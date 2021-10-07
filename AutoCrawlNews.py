@@ -24,7 +24,7 @@ if __name__ == '__main__':
         web = BaseWebsite("VietLao", "VietLaoVietNamCrawler", ["lo", "vi"])
         web.auto_crawl_website(parser.tgt_lang)
     if parser.web == "vnanet":
-        web = BaseWebsite("Vnanet", "VnanetCrawler", ["vi", "lo", "zh", "en"])
+        web = BaseWebsite("Vnanet", "VnanetCrawler", ["vi", "lo", "zh", "en","km"])
         web.auto_crawl_website(parser.tgt_lang)
     if parser.web == "vietnamplus":
         web = BaseWebsite("VietNamPlus", "VietNamPlusCrawler", ["vi", "zh", "en"])

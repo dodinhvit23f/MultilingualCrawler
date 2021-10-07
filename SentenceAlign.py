@@ -406,7 +406,7 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0
 # annotator = VnCoreNLP("<FULL-PATH-to-VnCoreNLP-jar-file>", annotators="wseg", max_heap_size='-Xmx500m')
 loadVectorEmbbeding(vector)
 loadStopWords()
-annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
+#annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
 
 if __name__ == '__main__':
 

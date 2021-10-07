@@ -184,11 +184,11 @@ class BaseWebsite:
             for line in array_link:
                 if line[0] != "" and line[0] != " ":
                     src_link = self.checkForLatestNews(driver=driver,link=line[0], link_crawled=src_link, first=first_source)
-            
+            """
             for line in array_link:
                 if line[1] != "" and line[1] != " ":
                     tgt_link = self.checkForLatestNews(driver=driver,link=line[1], link_crawled=tgt_link, first=first_tgt)
-            """
+
         if src_link:
             SaveFile.saveJsonFile(
                 file_path=crawl_folder + "/link/{}/link.txt".format(resource_lang),
@@ -293,6 +293,7 @@ class BaseWebsite:
 
             time.sleep(2)
             #pdb.set_trace()
+
             driver.get(link.format(index))
 
             html = driver.page_source
