@@ -288,7 +288,10 @@ class BaseWebsite:
 
         if self.name == "TapchiCongSan":
             return ConvertHtmlToText.getTapChiCongSanLink(driver=driver, link=link, list_=list_, first=first)
-
+        if self.name == "Vnanet":
+            driver.get(link.format(index))
+            html = ConvertHtmlToText.getVnanetParagragh(driver)
+            return list_ + ConvertHtmlToText.getVnanetLink(html, list_)
         while(run):
 
             time.sleep(2)
@@ -303,8 +306,7 @@ class BaseWebsite:
                 list_link = ConvertHtmlToText.getQDNDLink(driver, html)
             if self.name == "VietLao":
                 list_link = ConvertHtmlToText.getVietNamVietLaoLink(html)
-            if self.name == "Vnanet":
-                html = ConvertHtmlToText.getVnanetParagragh(driver)
+
                 list_link = ConvertHtmlToText.getVnanetLink(html)
             if self.name == "NhanDan":
                 list_link = ConvertHtmlToText.getNhanDanLink(html=html, language=language)

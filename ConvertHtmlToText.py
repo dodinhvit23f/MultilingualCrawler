@@ -81,13 +81,15 @@ def getVnanetParagragh(driver):
 
     return driver.page_source
 
-def getVnanetLink(html):
+def getVnanetLink(html, list_):
     list_link = list()
 
     soup = BeautifulSoup(html, "lxml")
     paragraphs = soup.findAll("div", {"id": "listScroll"})
+
     if not paragraphs:
         return None
+
     for paragraph in paragraphs:
         all_link = paragraph.findAll("a", {"class": "fon1"})
         array_time = paragraph.findAll("p", {"class": "fon3"})
@@ -101,6 +103,7 @@ def getVnanetLink(html):
 
             crawl_link = "{}//{}/{}/{}/{}".format(href_array[0], href_array[2], href_array[3], href_array[4],
                                                   href_array[5])
+            crawl_link = urllib.parse.quote_plus(crawl_link)
             time = array_time[count].text.split(" ")[0]
 
             title = all_title[count].text
@@ -108,7 +111,15 @@ def getVnanetLink(html):
                 .replace("*", "").replace("|", "").replace("\u200b"," ")\
                 .replace("/", "").replace("?", "").replace("*", "")
 
-            dic = {"url": urllib.parse.quote_plus(crawl_link),
+            hadIt = False
+            for x in list_:
+                if x['url'] == crawl_link:
+                    hadIt = True
+
+            if hadIt:
+                continue
+
+            dic = {"url": crawl_link,
                    "date": time,
                    "title": title}
 
