@@ -6,8 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 import ChromeDriver
 import Utility
 import configparser
-@dispatch(str, str, list)
-def translate(src_lang, tgt_lang, list_text):
+
+def translate(driver, src_lang, tgt_lang, list_text):
     list_transed_text = list()
     # sl la nguon ngu nguon
     # tl la nguon ngu dich
@@ -18,13 +18,14 @@ def translate(src_lang, tgt_lang, list_text):
     # f = open("link.test.txt", "w", encoding="utf-8")
     loop = 0
 
-    driver = ChromeDriver.getChromeDriver()
     print(len(list_text))
     try:
         for text in list_text:
             rawtext = text
             text = text.replace("?", "").replace(".", "？").replace(".", "")
             print(loop)
+            if( loop % 200 == 0):
+                driver.delete_all_cookies()
             while (True):
 
                 text = text.replace("?", "").replace(".", "？").replace(".", "")

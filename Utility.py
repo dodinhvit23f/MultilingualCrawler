@@ -1,6 +1,5 @@
 import re
 import json
-import pdb
 
 def deleteEmojify(text):
     regrex_pattern = re.compile(pattern="["

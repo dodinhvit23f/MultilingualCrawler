@@ -4,9 +4,6 @@ import ConvertHtmlToText
 import Punctuation
 
 
-
-
-
 def crawlWithLanguage(language):
     """
     :param language: "en", "ja", "km", "zh", "lo"

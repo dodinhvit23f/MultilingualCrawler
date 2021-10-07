@@ -90,12 +90,12 @@ def TF_IDF(src_sentence, tgt_sentence):
 
     if tf_idf_sorce > 0.97:
         return tf_idf_sorce
-
+    """
     if len(dict_tgt) > len(dict_src):
         size = len(dict_tgt)
     else:
         size = len(dict_src)
-    """
+    
     x = DissSimilarVector(dict_src, dict_tgt, size)
     x2 = DissSimilarVector(dict_tgt, dict_src, size)
     
@@ -159,7 +159,7 @@ def TF_IDF_Vector(dict_words, dict_src):
             else:
                 vector[start] = dict_src[word]
         else:
-            vector[start] = -1
+            vector[start] = -.65
         start = start + 1
     return vector
 
@@ -220,7 +220,7 @@ def preprocessString(list_dict_src, token=True):
         sentence = sentence.lower()
         list_dict_src[start]['title'] = sentence
         if (token):
-            list_dict_src[start]["words"] =  removeStopWord(sentence.split(" "))
+            list_dict_src[start]["words"] = removeStopWord(sentence.split(" "))
         else:
             list_dict_src[start]["words"] = sentence.split(" ")
         start = start + 1
@@ -411,8 +411,8 @@ annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ne
 if __name__ == '__main__':
 
     # Input
-    text_origin = "26 năm Việt Nam đồng hành và phát triển cùng cộng đồng ASEAN"
-    text_trans = "26 năm Việt Nam đồng hành và phát triển cùng cộng đồng ASEAN"
+    text_origin = "chuyển_đổi sang kỹ_thuật_số động_lực để phát_triển"
+    text_trans = "chuyển_đổi số động_lực phát_triển"
     # To perform word segmentation, POS tagging, NER and then dependency parsing
     #annotated_text = annotator.annotate(text)
     #print(sentenceToTokenize(text_trans).split(" "))

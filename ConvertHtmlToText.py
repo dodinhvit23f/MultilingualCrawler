@@ -1,5 +1,4 @@
 import os
-import pdb
 import time
 import traceback
 import urllib
@@ -12,165 +11,60 @@ import SaveFile
 import datetime as dt
 import re
 from selenium.webdriver.support.ui import WebDriverWait
+import pdb
 
-
-def getTextFromTagsWithClass(src_link, tag, class_):
-    soup = BeautifulSoup(urllib.request.urlopen(src_link).read(), "lxml")
-    text = ""
-
-    for tag_text in soup.findAll(tag, class_=class_):
-        tagText = Utility.formatString(tag_text.text)
-        tagText = tagText.replace("\n+", " ")
-        tagText = tagText.replace("/.", "")
-        tagText = tagText.strip()
-        # ký tự lạ xuất hiện tại một số bài báo
-
-        if tagText and not tagText == "":
-            text += tagText
-
-    return text
-
-
-def getTextFromTagsWithId(src_link, tag, id):
-    soup = BeautifulSoup(urllib.request.urlopen(src_link).read(), "lxml")
-    text = ""
-
-    for tag_text in soup.findAll(tag, {"id": id}):
-        # pdb.set_trace()
-        tagText = Utility.formatString(tag_text.text)
-        tagText = tagText.replace("\n+", " ")
-        tagText = tagText.replace("/.", "")
-        tagText = tagText.strip()
-        # ký tự lạ xuất hiện tại một số bài báo
-
-        if tagText and not tagText == "":
-            text += tagText
-
-    return text
-
-
-def getTextFromTags(src_link, tag):
-    soup = BeautifulSoup(urllib.request.urlopen(src_link).read(), "lxml")
-    text = ""
-
-    for j in soup.findAll(tag):
-
-        text_in_timestamp = Utility.formatString(j.text)
-        text_in_timestamp = text_in_timestamp.replace("/.", "")
-        text_in_timestamp = text_in_timestamp.strip()
-        if text_in_timestamp:
-            text += text_in_timestamp
-
-    return text
-
-
-def getVovParagragh(driver, url, tag_time="time"):
-    not_get_web = True
-    while (not_get_web):
-        try:
-            driver.get(url)
-            not_get_web = False
-        except:
-            print("Loi khong get link duoc {}".format(url))
-            pdb.set_trace()
-            time.sleep(2)
-            pass
-    time.sleep(0.5)
-    try:
-        times = WebDriverWait(driver, 5).until(lambda driver: driver.find_elements_by_tag_name(tag_time))
-        list_time = list()
-        for time_ in times:
-            list_time.append(time_.text)
-        source = driver.page_source
-    except:
-         return None
-    return  source
-
-
-def getVovLink(link, list_=list()):
-    """
-    :param src_link:
-    :param dict_:
-    :return:
-    """
-    # src_link chua max_mage va url de lay bai viet
-
+def getVovLink(html):
     base_url = "https://vovworld.vn/"
 
-    index = 1
-    print("Page: ")
     list_link = list()
-    driver = ChromeDriver.getChromeDriver()
 
-    while (index > 0):
-        print(index)
-        pdb.set_trace()
-        html = getVovParagragh(driver, url="{}{}".format(link, index))
+    if not html:
+        return list()
 
-        if not html:
-            break
+    soup = BeautifulSoup(html, "lxml")
 
-        soup = BeautifulSoup(html, "lxml")
+    container = soup.findAll("div", "l-grid__main")
+    if not container:
+        return None
 
-        container = soup.findAll("div", "l-grid__main")
+    for paragraphs in container:
 
-        for paragraphs in container:
+        list_paragraph = paragraphs.findAll("article", "story")
 
-            list_paragraph = paragraphs.findAll("article", "story")
-            index_time = 0
+        if not list_paragraph:
+            return list()
+        #pdb.set_trace()
+        for paragraph in list_paragraph:
 
-            if not list_paragraph:
-                index = - 1
-                break
+            if (paragraph.h2.a.attrs['href'] != None):
+                datetime = paragraph.p.time.text
+                datetime = datetime.strip()
 
-            for paragraph in list_paragraph:
+                try:
+                    x = dt.datetime.strptime(datetime, "%d/%m/%Y")
+                except:
+                    datetime = dt.datetime.strptime(str(dt.datetime.now()).strip(" ")[0: 10], "%Y-%m-%d")
+                    datetime = time.strftime("%d/%m/%Y")
 
-                if (paragraph.h2.a.attrs['href'] != None):
-                    hadIt = False
-                    # print("Kiểm tra link trùng")
-                    # pdb.set_trace()
-                    for link_dict in list_:
-                        if (link_dict['url'] == str(base_url + urllib.parse.quote_plus(paragraph.a['href']))):
-                            hadIt = True
-                            break
+                titile = paragraph.h2.text.replace("\n", "").replace("\s+", "").strip()
 
-                    if hadIt:
-                        # pdb.set_trace()
-                        index = - 1
-                        break
+                if datetime and titile:
+                    dic = {"url": base_url + urllib.parse.quote_plus(paragraph.a['href']),
+                           "date": datetime,
+                           "title": titile}
 
-                    datetime = paragraph.time.text
-
-                    titile = paragraph.h2.text.replace("\n", "").replace("\s+", "").strip()
-
-                    if datetime:
-                        if titile:
-                            dic = {"url": base_url + urllib.parse.quote_plus(paragraph.a['href']),
-                                   "date": datetime,
-                                   "title": titile}
-
-                            list_link.append(dic)
-
-                        index_time = index_time + 1
-                    continue
-                else:
-                    print("khong co duong dan: "+paragraph.h2.text.replace("\n", "").replace("\s+", "").strip())
-        index = index + 1
-
-    driver.close()
-
+                    list_link.append(dic)
+                continue
+            print("khong co duong dan: " + paragraph.h2.text.replace("\n", "").replace("\s+", "").strip())
     return list_link
 
-
-def getVnanetParagragh(driver, url):
+def getVnanetParagragh(driver):
     """
     :param driver: selenium driver
     :param url:
     :return:
     """
     try:
-        driver.get(url)
-        print(url)
         xx = driver.find_element_by_id("idviewsmores")
 
         while (True):
@@ -180,7 +74,6 @@ def getVnanetParagragh(driver, url):
 
                 xx = driver.find_element_by_id("idviewsmores")
                 print(xx)
-
             else:
                 break
     except:
@@ -188,18 +81,13 @@ def getVnanetParagragh(driver, url):
 
     return driver.page_source
 
-
-def getVnanetLink(link, list_):
+def getVnanetLink(html):
     list_link = list()
 
-    driver = webdriver.Chrome(executable_path=os.path.abspath(os.getcwd() + "/chromedriver.exe"))
-    source = getVnanetParagragh(driver, link)
-    soup = BeautifulSoup(source, "lxml")
-
+    soup = BeautifulSoup(html, "lxml")
     paragraphs = soup.findAll("div", {"id": "listScroll"})
-
-    hadIt = False
-
+    if not paragraphs:
+        return None
     for paragraph in paragraphs:
         all_link = paragraph.findAll("a", {"class": "fon1"})
         array_time = paragraph.findAll("p", {"class": "fon3"})
@@ -213,21 +101,12 @@ def getVnanetLink(link, list_):
 
             crawl_link = "{}//{}/{}/{}/{}".format(href_array[0], href_array[2], href_array[3], href_array[4],
                                                   href_array[5])
-
-            for list_dict in list_:
-                if crawl_link == list_dict['url']:
-                    hadIt = True
-                    break
-            if hadIt:
-                break
-
             time = array_time[count].text.split(" ")[0]
 
             title = all_title[count].text
-
-            title = title.replace("\t", "").replace("\n", "").replace("*", "").replace("|", "").replace("\u200b",
-                                                                                                        " ").replace(
-                "/", "").replace("?", "").replace("*", "")
+            title = title.replace("\t", "").replace("\n", "")\
+                .replace("*", "").replace("|", "").replace("\u200b"," ")\
+                .replace("/", "").replace("?", "").replace("*", "")
 
             dic = {"url": urllib.parse.quote_plus(crawl_link),
                    "date": time,
@@ -236,69 +115,236 @@ def getVnanetLink(link, list_):
             list_link.append(dic)
 
             count = count + 1
-        if hadIt:
-            break
-    driver.close()
+
 
     return list_link
 
-
-def getQDNDParagragh(driver, url):
-    driver.get(url)
-    time.sleep(0.5)
-    return driver.page_source
-
-
-def getQDNDLink(link, list_):
+def getQDNDLink(driver, html):
     list_link = list()
-    driver = webdriver.Chrome(executable_path=os.path.abspath(os.getcwd() + "/chromedriver.exe"))
-    index = 1
+    WebDriverWait(driver, 200).until(lambda driver: driver.find_elements_by_tag_name('img'))
+    soup = BeautifulSoup(html, "lxml")
 
-    Running = True
+    content = soup.find("div", {"class": "list-news-category"})
 
-    while (Running):
+    if not content:
+        content = soup.find("div", {"class": "ctrangc3"})
+    if not content:
+        return None
+
+    paragraphs = content.findAll("article",{"class": ""})
+    if not paragraphs:
+        paragraphs = soup.findAll("div", {"class": "pcontent"})
+    if not paragraphs:
+        paragraphs = soup.findAll("div", {"class": "pcontent3"})
+    if not paragraphs:
+        return list_link
+
+    for paragraph in paragraphs:
         try:
-            source = getQDNDParagragh(driver, link.format(index))
-            WebDriverWait(driver, 200).until(lambda driver: driver.find_elements_by_tag_name('img'))
-            soup = BeautifulSoup(source, "lxml")
+            href = paragraph.find("a").attrs['href']
+            title = paragraph.find("h3").text
+            title = title.replace("\"", " ")
+            title = title.replace("\'", " ")
+            title = title.strip()
 
-            content = soup.find("div", {"class": "list-news-category"})
-            if not content:
-                content = soup.find("div", {"class": "ctrangc3"})
+            dic = {"url": href,
+                   "title": title}
 
-            paragraphs = content.findAll("article", {"class": ""})
-            if not paragraphs:
-                paragraphs = soup.findAll("div", {"class": "pcontent"})
-            if not paragraphs:
-                paragraphs = soup.findAll("div", {"class": "pcontent3"})
-            if not paragraphs:
+            list_link.append(dic)
+        except:
+            pass
+
+    return list_link
+
+def getNhanDanLink(html, language):
+    list_ = list()
+    soup = BeautifulSoup(html, "lxml")
+    if language == "vi":
+        articles = soup.findAll("article")
+    if language == "zh":
+        articles = soup.findAll("div", {"class": "media-body"})
+
+    if articles == None:
+        return None
+    if not articles:
+        return list_
+
+    base_url = "https://nhandan.com.vn/"
+    if language == 'zh':
+        base_url = "https://cn.nhandan.com.vn/"
+
+    for div in articles:
+        if language == "lo":
+            if (div.h3 == None):
+                continue
+
+            date_box = div.find("small", {"class": "text-muted"})
+
+            if (date_box == None):
+                continue
+
+            title = div.h3.text.replace("\n", "").replace("\t", "")
+
+            href = base_url + urllib.parse.quote_plus(div.h3.a.attrs['href'])
+            href = href.replace("%2F", "/")
+
+            date_time = date_box.text.replace("nbsp;", "").split(" ")[0]
+            date_time = date_time.replace("\xa0", "")
+            date_time = date_time.replace("年", "/").replace("月", "/").replace("日", "")
+        if language == "vi":
+            div_ = div.find("div", {"class": "box-title"})
+            if (div_ == None):
+                continue
+
+            date_box = div.find("div", {"class": "box-meta-small"})
+            if (date_box == None):
+                continue
+
+            title = div_.a.attrs['title'].replace("\n", "").replace("\t", "")
+            href = base_url + urllib.parse.quote_plus(div_.a.attrs['href'])
+            href = href.replace("%2F", "/")
+
+            date_time = date_box.text
+            date_time = dt.datetime.strptime(date_time.split(" ")[1], '%d/%m/%Y').strftime("%Y/%m/%d")
+
+        dict_ = {"url": href, "date": date_time, "title": title}
+        list_.append(dict_)
+    return list_
+
+def getVietNamVietLaoLink(html):
+    list_link = list()
+    base_url = "https://vietlao.vietnam.vn"
+    soup = BeautifulSoup(html, "lxml")
+    divs = soup.find_all("div", {"class": "post-meta"})
+
+    if not divs:
+        return list_link
+
+    for div in divs:
+
+        link_string = base_url + div.find("a").attrs['href']
+        titile_string = div.find("a").attrs['title']
+        titile_string = titile_string.replace("\"", "")
+
+        new = re.sub("\"", "\'", titile_string)
+
+        time_string = div.find("li").text
+        time_ = re.sub("\"", "\'", time_string)
+
+        dict_ = {"url": link_string, "date": time_, "title": new}
+
+        list_link.append(dict_)
+
+
+    return list_link
+
+def getVietNamPlusLink_Date_Titile(html, link):
+    base_link = "https://www.vietnamplus.vn/"
+    lang = "vi"
+    if ("zh" in link):
+        lang = "zh"
+        base_link = "https://zh.vietnamplus.vn/"
+
+    list_link = list()
+
+    soup = BeautifulSoup(html, "lxml")
+
+    div_clear_fix = soup.findAll("div", {"class": "clearfix"})
+
+    if (div_clear_fix != None):
+        articles = div_clear_fix[0].findAll("article", class_="story")
+        if (articles != None):
+            for article in articles:
+                if article.time != None:
+                    time = article.time.text.strip()
+
+                    # time = "2021年2月12日14:12"
+                    if (lang != "vi"):
+                        time = time.replace('年', '-').replace('月', '-').replace('日', ' ')
+                        time = dt.datetime.strptime(time, '%Y-%m-%d %H:%M')
+                        time = time.strftime("%d-%m-%Y")
+                    else:
+                        # pdb.set_trace()
+                        time = dt.datetime.strptime(time, '%d/%m/%Y - %H:%M')
+                        time = time.strftime("%d-%m-%Y")
+
+                else:
+                    time = dt.datetime.strptime(str(dt.datetime.now()).strip(" ")[0: 10], "%Y-%m-%d")
+                    time = time.strftime("%d-%m-%Y")
+
+                href = base_link + urllib.parse.quote_plus(article.h2.a.attrs['href'])
+
+                title = article.h2.text
+                title = title.replace("\n", "").replace("/", "").replace("*", "").replace("{", "").replace("}", "")
+                title = re.sub("\s+", " ", title).strip()
+
+                dic = {"url": href,
+                       "title": title,
+                       "date": time}
+
+                list_link.append(dic)
+
+    return list_link
+
+def getTapChiCongSanLink(driver, link, list_, first=True):
+    driver.get(link)
+    index = 1
+    list_link = list()
+
+    Ended = False
+    while (True):
+
+        soup = BeautifulSoup(driver.page_source, "lxml")
+        divs = soup.findAll("div", class_="itemNews")
+
+        if divs == None:
+            break
+
+        if not divs:
+            break
+
+        for div in divs:
+            href = div.find("h4", class_="titleNews").a.attrs['href']
+            title = div.find("h4", class_="titleNews").text
+            title = title.strip()
+            title = Utility.formatSentence(title)
+            addIt = True
+            for x in list_:
+                if x['url'] == href:
+                    if not first:
+                        Ended = True
+                    addIt = False
+                    break
+
+            if addIt:
+                list_link.append({"url": href, "title": title})
+
+        div = driver.find_element_by_xpath("//div[@class='search-results']")
+        li_tags = div.find_elements_by_xpath(".//li")
+
+        next_page = 0
+
+        for li in li_tags:
+            a_tag = li.find_element_by_xpath(".//a")
+
+            if (a_tag.text == "»"):
+                Ended = True
                 break
 
-            for paragraph in paragraphs:
-                try:
-                    href = paragraph.find("a").attrs['href']
-                    title = paragraph.find("h3").text
-                    title = title.replace("\"", " ")
-                    title = title.replace("\'", " ")
-                    title = title.strip()
-                    dic = {"url": href,
-                           "title": title}
-                    for link_dict in list_:
-                        if link_dict['url'] == dic["url"]:
-                            Running = False
-                            break
-                    list_link.append(dic)
-                except:
-                    pass
+            if not a_tag.text.isnumeric():
+                continue
 
-            index = index + 1
-        except:
-            print("ngu 10 s")
-            time.sleep(10)
-            pass
+            next_page = int(a_tag.text)
+
+            if (index < next_page):
+                index = next_page
+                a_tag.click()
+                break
+
+        if (Ended):
+            break
     driver.close()
     return list_link
-
 
 def enlist_talk_names(path, dict_, src_lang_, tgt_lang_):
     status = False
@@ -320,7 +366,6 @@ def enlist_talk_names(path, dict_, src_lang_, tgt_lang_):
 
     return status
 
-
 def get_links_and_langs(target_link, target_lang, all_link, src_lang_, tgt_lang_):
     for soup in all_link:
         # kiểm tra đường dẫn có bằng None hay không và tìm
@@ -334,13 +379,10 @@ def get_links_and_langs(target_link, target_lang, all_link, src_lang_, tgt_lang_
                 target_link.append(soup)
                 target_lang.append(lang)
 
-
 """
 src_params a list of vi transcript segments
 tgt_params a list of ja transcript segments  
 """
-
-
 def get_transcript(src_params, tgt_params, target_link, tgt_lang_):
     for j in target_link:
         if j.get('href') != None and j.attrs['href'].find('?language=') != -1:
@@ -370,7 +412,6 @@ def get_transcript(src_params, tgt_params, target_link, tgt_lang_):
             else:
                 src_params += text_params
 
-
 def convert_2_speech_per_line(ori_text):
     # tmp_text = ori_text.replace('\t', '\n')
     tmp_text = ori_text.replace('\n', ' ').replace('\t', '\n')
@@ -381,14 +422,12 @@ def convert_2_speech_per_line(ori_text):
     tmp_text = tmp_text.strip()
     return tmp_text
 
-
 def merge_all_params(list_param, spliting_param_by_empty_line=False):
     final_text = ""
     spliting_param_char = '\n\n' if spliting_param_by_empty_line else '\n'
     for param in list_param:
         final_text += param.strip() + spliting_param_char
     return final_text.strip()
-
 
 """ 
 There are many cases.
@@ -399,8 +438,6 @@ Currenty, they are:
 src_params a list of vi transcript segments
 tgt_params a list of ja transcript segments  
 """
-
-
 def format_subtitle_and_saving(src_params, tgt_params,
                                output_dir_fail, output_dir_success, talk_name, src_lang_, tgt_lang_):
     if (tgt_lang_.find("zh") != -1):
@@ -460,8 +497,6 @@ there are two cases:
 src_params a list of vi transcript segments
 tgt_params a list of ja transcript segments  
 """
-
-
 def extract_talk(path, talk_name, output_dir_success, output_dir_fail, src_lang_, tgt_lang_):
     # if talk_name in os.path.isfile(output_dir_success[0]+):
     # return
@@ -499,259 +534,3 @@ def extract_talk(path, talk_name, output_dir_success, output_dir_fail, src_lang_
             traceback.print_exc()
             pass
 
-
-def getNhanDanAllViParagraph(driver, url):
-    # driver = ChromeDriver.getChromeDriver()
-
-    list_src = list()
-    index = 1
-    count_fail = 1
-    while (True):
-        try:
-
-            driver.get(url.format(index))
-
-            WebDriverWait(driver, 200).until(lambda driver: driver.find_elements_by_tag_name('article'))
-
-            soup = BeautifulSoup(driver.page_source, "lxml")
-            articles = soup.findAll("article")
-
-            while (articles == None):
-                time.sleep(6)
-                count_fail = count_fail + 1
-                driver.get(url.format(index))
-
-                if (count_fail == 7):
-                    break
-
-            if not articles:
-                break
-
-            for article in articles:
-
-                div = article.find("div", {"class": "box-title"})
-                title = div.a.attrs['title'].replace("\n", "").replace("\t", "")
-
-                if (div == None):
-                    continue
-
-                href = div.a.attrs['href']
-                href = href.replace("%2F", "/")
-
-                date_box = article.find("div", {"class": "box-meta-small"})
-
-                if (date_box == None):
-                    continue
-                if not date_box:
-                    continue
-                date_time = date_box.text
-                date_time = dt.datetime.strptime(date_time.split(" ")[1], '%d/%m/%Y').strftime("%Y/%m/%d")
-
-                if not href in list_src:
-                    print(href)
-
-                    dic = {"url": href,
-                           "title": title,
-                           "date": date_time}
-                    list_src.append(dic)
-
-
-        except:
-            traceback.print_exc()
-
-            break
-            pass
-        index = index + 1
-
-    driver.delete_all_cookies()
-    driver.close()
-    return list_src
-
-
-def getNhanDanAllZhpragraph(driver, url):
-    list_ = list()
-    index = 1
-    count_fail = 1
-
-    while (True):
-        try:
-
-            driver.get(url.format(index))
-
-            soup = BeautifulSoup(driver.page_source, "lxml")
-
-            WebDriverWait(driver, 200).until(lambda driver: driver.find_elements_by_tag_name('div'))
-            divs = soup.findAll("div", {"class": "media-body"})
-
-            if (divs == None):
-                break
-
-            if not divs:
-                break
-            # pdb.set_trace()
-
-            for div in divs:
-
-                if (div.h3 == None):
-                    continue
-
-                title = div.h3.text.replace("\n", "").replace("\t", "")
-
-                href = div.h3.a.attrs['href']
-
-                date_box = div.find("small", {"class": "text-muted"})
-
-                if (date_box == None):
-                    continue
-
-                if not divs:
-                    break
-
-                date_time = date_box.text.replace("nbsp;", "").split(" ")[0]
-                date_time = date_time.replace("\xa0", "")
-                date_time = date_time.replace("年", "/").replace("月", "/").replace("日", "")
-
-                dic = {"url": href,
-                       "title": title,
-                       "date": date_time}
-
-                if not dic in list_:
-                    # pdb.set_trace()
-
-                    list_.append(dic)
-
-
-        except:
-            traceback.print_exc()
-            pass
-        index = index + 15
-    driver.close()
-
-    return list_
-
-
-def getVietNamVietLaoLink(link, list_):
-    index = 1
-    list_link = list()
-    dict_ = dict()
-    hadIt = False
-    driver = ChromeDriver.getChromeDriver()
-    while (True):
-
-        if hadIt:
-            break
-        driver.get(link.format(index))
-        divs = driver.find_elements_by_xpath("//div[@class='post-meta']")
-
-        if not divs:
-            break
-
-        time.sleep(1)
-
-        for div in divs:
-
-            if hadIt:
-                break
-            link_string = div.find_element_by_xpath(".//a").get_attribute('href')
-            titile_string = div.find_element_by_xpath(".//a").get_attribute('title')
-            titile_string = titile_string.replace("\"", "")
-
-            for link_dict in list_:
-                if link_dict['url'] == link_string:
-                    hadIt = True
-                    break
-
-            new = re.sub("\"", "\'", titile_string)
-
-            time_string = div.find_element_by_xpath(".//li").text
-
-            time_ = re.sub("\"", "\'", time_string)
-
-            #print("{}  - {}".format(titile_string, new))
-
-            dict_ = {"url": link_string, "date": time_, "title": new}
-            list_link.append(dict_)
-        index = index + 1
-    driver.delete_all_cookies()
-    driver.close()
-
-    return list_link
-
-
-def getVietNamPlusLink_Date_Titile(link, list_):
-    base_link = "https://www.vietnamplus.vn/"
-    lang = "vi"
-    if ("zh" in link):
-        lang = "zh"
-        base_link = "https://zh.vietnamplus.vn/"
-
-    if (base_link == None):
-        return
-
-    list_link = list()
-    driver = webdriver.Chrome(executable_path=os.path.abspath(os.getcwd() + "/chromedriver.exe"))
-    hadLink = False
-    index = 1
-    #pdb.set_trace()
-    while(index > 0):
-
-        driver.get(link.format(index))
-
-        soup = BeautifulSoup(driver.page_source, "lxml")
-
-        div_clear_fix = soup.findAll("div", {"class": "clearfix"})
-
-        if (div_clear_fix != None):
-            articles = div_clear_fix[0].findAll("article", class_="story")
-
-            if (articles != None):
-                for article in articles:
-                    if (article.time != None):
-                        time = article.time.text.strip()
-
-                        # time = "2021年2月12日14:12"
-                        if (lang != "vi"):
-                            time = time.replace('年', '-').replace('月', '-').replace('日', ' ')
-                            time = dt.datetime.strptime(time, '%Y-%m-%d %H:%M')
-                            time = time.strftime("%d-%m-%Y")
-                        else:
-                            # pdb.set_trace()
-                            time = dt.datetime.strptime(time, '%d/%m/%Y - %H:%M')
-                            time = time.strftime("%d-%m-%Y")
-
-                    else:
-                        time = dt.datetime.strptime(str(dt.datetime.now()).strip(" ")[0: 10], "%Y-%m-%d")
-                        time = time.strftime("%d-%m-%Y")
-
-                    href = base_link + urllib.parse.quote_plus(article.h2.a.attrs['href'])
-
-
-                    for exists_link in list_:
-
-                        if (exists_link["url"] == href):
-                            hadLink = True
-                            break
-
-                    for exists_link in list_link:
-                        if (exists_link["url"] == href):
-                            hadLink = True
-                            break
-
-                    if hadLink:
-                        break
-
-                    title = article.h2.text
-                    title = title.replace("\n", "").replace("/", "").replace("*", "").replace("{", "").replace("}", "")
-                    title = re.sub("\s+", " ", title).strip()
-
-                    dic = {"url": href,
-                           "title": title,
-                           "date": time}
-
-                    list_link.append(dic)
-            index += 1
-            continue
-        break
-    driver.close()
-
-    return list_link

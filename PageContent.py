@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import Utility
-import requests
 import pdb
+from requests_html import HTMLSession
 
 def getTextFromTagsWithClass(html, tag, class_):
     soup = BeautifulSoup(html, "lxml")
@@ -109,4 +109,10 @@ def getNhanDanNewsContent(html, lang = "vi"):
 
     return getTextFromTagsWithClass(html, "div", "detail-page")
 
+def getTapChiCongSanConntent(html, lang = "vi"):
+
+    if lang == "vi":
+        return getTextFromTagsWithClass(html, "div", "ContentDetail")
+
+    return getTextFromTagsWithClass(html, "div", "journal-content-article")
 #print(getQuanDoiNhanDan(requests.get("https://kh.qdnd.vn/preview/pid/27/newid/513765").content, lang= "km"))

@@ -101,6 +101,7 @@ def openTranslatedTitle(crawl_folder, tgt_link):
         del (list_trans[start])
 
 def loadJsonFile(file_path):
+    print(file_path)
     f = open(file_path, "r", encoding="utf-8")
     for line in f:
         src_link = Utility.stringJsonToOject(line)
