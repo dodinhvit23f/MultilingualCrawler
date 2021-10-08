@@ -16,7 +16,7 @@ def translate(driver, src_lang, tgt_lang, list_text):
     search_text = ""
     sign = ";"
     # f = open("link.test.txt", "w", encoding="utf-8")
-    loop = 0
+    loop = 1
 
     print(len(list_text))
     try:
@@ -24,10 +24,10 @@ def translate(driver, src_lang, tgt_lang, list_text):
             rawtext = text
             text = text.replace("?", "").replace(".", "？").replace(".", "")
             print(loop)
-            if( loop % 200 == 0):
+            if( loop % 800 == 0):
                 driver.delete_all_cookies()
             while (True):
-
+                time.sleep(1.5)
                 text = text.replace("?", "").replace(".", "？").replace(".", "")
                 #
                 # pdb.set_trace()
@@ -48,7 +48,7 @@ def translate(driver, src_lang, tgt_lang, list_text):
                     list_transed_text.append({src_lang: list_, "zh": rawtext})
                 break
             print(list_)
-            time.sleep(1)
+
             loop = loop + 1
     except Exception as e:
         print(e)
@@ -76,7 +76,6 @@ def sentencesAlignment(src_source, tgt_source, tgt_lang):
     data = Utility.stringJsonToOject(response.text)
     for x in data['data']:
         print(x)
-
 
 def sentencesSegmentation(src_source, tgt_lang):
     global  config

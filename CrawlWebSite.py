@@ -152,7 +152,7 @@ class BaseWebsite:
             tgt_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}/link.txt".format(target_lang))
         print("Vi : {}".format(len(src_link)))
         print("{} : {}".format(target_lang,len(tgt_link)))
-        pdb.set_trace()
+
         driver = ChromeDriver.getChromeDriver()
 
         for folder in list_resource_folder:
@@ -180,11 +180,10 @@ class BaseWebsite:
                     os.makedirs(crawl_folder + "/link/{}/".format(target_lang))
                     first_tgt = True
 
-            """
             for line in array_link:
                 if line[0] != "" and line[0] != " ":
                     src_link = self.checkForLatestNews(driver=driver,link=line[0], link_crawled=src_link, first=first_source)
-            """
+
             for line in array_link:
                 if line[1] != "" and line[1] != " ":
                     tgt_link = self.checkForLatestNews(driver=driver,link=line[1], link_crawled=tgt_link, first=first_tgt)
@@ -193,6 +192,7 @@ class BaseWebsite:
             SaveFile.saveJsonFile(
                 file_path=crawl_folder + "/link/{}/link.txt".format(resource_lang),
                 link_dict=src_link)
+
         if tgt_link:
             SaveFile.saveJsonFile(
                 file_path=crawl_folder + "/link/{}/link.txt".format(target_lang),
@@ -208,8 +208,10 @@ class BaseWebsite:
 
             if (target_lang == 'zh'):
                 list_translate = AlignmentNews.translate(driver, "vi", 'zh-CN', list_tgt_title)
+                print()
             else:
                 list_translate = AlignmentNews.translate(driver, "vi", target_lang, list_tgt_title)
+                print()
 
             SaveFile.saveJsonFile(crawl_folder + "/link/{}/title.txt".format(target_lang), link_dict=list_translate)
 
@@ -261,8 +263,6 @@ class BaseWebsite:
 
         pair_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang))
 
-
-
         for link in pair_link:
             self.saveDocument(driver, link[resource_lang], link[target_lang], target_lang, document_folder)
 
@@ -306,8 +306,8 @@ class BaseWebsite:
                 list_link = ConvertHtmlToText.getQDNDLink(driver, html)
             if self.name == "VietLao":
                 list_link = ConvertHtmlToText.getVietNamVietLaoLink(html)
-
-                list_link = ConvertHtmlToText.getVnanetLink(html)
+            if self.name == "VietNamPlus":
+                list_link = ConvertHtmlToText.getVietNamPlusLink_Date_Titile(html,link)
             if self.name == "NhanDan":
                 list_link = ConvertHtmlToText.getNhanDanLink(html=html, language=language)
 
@@ -317,7 +317,22 @@ class BaseWebsite:
             if not list_link:
                 run = False
 
+
+            lim = len(list_link)
+
+
+            for dict in list_link:
+                for crawled_link in return_list:
+                    if crawled_link['url'] == dict['url']:
+                        # pdb.set_trace()
+                        lim = lim - 1
+                        break
+
+            if(lim == 0):
+                break
+
             hadIt = False
+            #pdb.set_trace()
             for dict in list_link:
 
                 for crawled in list_:
@@ -325,6 +340,7 @@ class BaseWebsite:
                         hadIt = True
                         break
                 #pdb.set_trace()
+
                 if not hadIt:
                     return_list.append(dict)
                     continue

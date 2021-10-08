@@ -260,12 +260,15 @@ def getVietNamPlusLink_Date_Titile(html, link):
 
     soup = BeautifulSoup(html, "lxml")
 
-    div_clear_fix = soup.findAll("div", {"class": "clearfix"})
+    div_clear_fix = soup.find("div", {"class": "clearfix"})
 
     if (div_clear_fix != None):
-        articles = div_clear_fix[0].findAll("article", class_="story")
+        articles = div_clear_fix.findAll("article", class_="story")
         if (articles != None):
+
             for article in articles:
+                if (len(article.attrs['class']) > 1):
+                    continue
                 if article.time != None:
                     time = article.time.text.strip()
 
@@ -497,7 +500,6 @@ def format_subtitle_and_saving(src_params, tgt_params,
                           tgt_lang_=src_lang_)
 
     return
-
 
 """
 format_and_save by using the script in <p> not the whole script of subtitle in .ja and .vi
