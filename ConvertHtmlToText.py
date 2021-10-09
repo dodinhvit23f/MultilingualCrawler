@@ -280,11 +280,10 @@ def getVietNamPlusLink_Date_Titile(html, link):
                     else:
                         # pdb.set_trace()
                         time = dt.datetime.strptime(time, '%d/%m/%Y - %H:%M')
-                        time = time.strftime("%d-%m-%Y")
-
+                        time = time.strftime("%d/%m/%Y")
                 else:
                     time = dt.datetime.strptime(str(dt.datetime.now()).strip(" ")[0: 10], "%Y-%m-%d")
-                    time = time.strftime("%d-%m-%Y")
+                    time = time.strftime("%d/%m/%Y")
 
                 href = base_link + urllib.parse.quote_plus(article.h2.a.attrs['href'])
 
