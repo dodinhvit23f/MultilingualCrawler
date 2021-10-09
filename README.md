@@ -1,9 +1,9 @@
 # Paracrawl
-Crawl Multi Language News Website Content like VovWorld, VNAnet, VietNamPlus, QuanDoiNhanDan etc
+Crawl multilingual website likes VovWorld, VNAnet, VietNamPlus, QuanDoiNhanDan etc
 
-This tools made by me with help of instructors **DR. Tran Hong Viet** (thviet79) and **masters Bui Van Tan**
+This tools has been contributed by **Do Dinh Tien**, **Tran Hong Viet** (thviet79) and ** Bui Van Tan**
 
-This tool is by for Window and Linux users, it purpose to crawl rare Language such as **Laotian, Khmer** and popular language like **Chinese, English** etc you can add more if you want
+This tool is by for Window and Linux users, it purpose to crawl low-resource language such as **Laotian, Khmer** and popular language like **Chinese, English** etc you can add more if you want
 
 > **Folders and Files organize**
 
@@ -29,13 +29,13 @@ chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
 
 chuyển_đổi| động_lực | phát_triển| số |
 --- | --- | --- | --- |
-2 | 2 | 2 | 1 |
+1 | 1 | 1 | 1 |
 
 **S2 bag of words**
 
 chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển|
 --- | --- | --- | --- |
-2 | 1 | 2 | 2 |
+1| 1 | 1 | 1 |
 
 **TF-IDF Vector** 
 
