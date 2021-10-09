@@ -29,13 +29,13 @@ chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển| số |
 
 chuyển_đổi| động_lực | phát_triển| số |
 --- | --- | --- | --- |
-2 | 2 | 2 | 1 |
+1 | 1 | 1 | 1 |
 
 **S2 bag of words**
 
 chuyển_đổi | kỹ_thuật_số | động_lực | phát_triển|
 --- | --- | --- | --- |
-2 | 1 | 2 | 2 |
+1| 1 | 1 | 1 |
 
 **TF-IDF Vector** 
 
