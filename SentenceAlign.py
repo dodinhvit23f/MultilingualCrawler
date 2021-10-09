@@ -406,13 +406,13 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0
 # annotator = VnCoreNLP("<FULL-PATH-to-VnCoreNLP-jar-file>", annotators="wseg", max_heap_size='-Xmx500m')
 loadVectorEmbbeding(vector)
 loadStopWords()
-#annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
+annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
 
 if __name__ == '__main__':
 
     # Input
-    text_origin = "chuyển_đổi sang kỹ_thuật_số động_lực để phát_triển"
-    text_trans = "chuyển_đổi số động_lực phát_triển"
+    text_origin = "chân bàn"
+    text_trans = "bàn chân"
     # To perform word segmentation, POS tagging, NER and then dependency parsing
     #annotated_text = annotator.annotate(text)
     #print(sentenceToTokenize(text_trans).split(" "))
