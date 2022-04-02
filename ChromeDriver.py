@@ -6,8 +6,8 @@ hàm này dùng để tránh bị websites phát hiện là công cụ chạy te
 """
 def getChromeDriver():
     options = webdriver.ChromeOptions()
-
-    
+    options.add_argument('--ignore-ssl-errors=yes')
+    options.add_argument('--ignore-certificate-errors')
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     # đặt ngôn ngữ việt công cụ
@@ -30,5 +30,6 @@ def getChromeDriver():
     
     driver = webdriver.Chrome(os.path.abspath(os.getcwd()+"/chromedriver"),options= options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
     #pdb.set_trace()
     return driver

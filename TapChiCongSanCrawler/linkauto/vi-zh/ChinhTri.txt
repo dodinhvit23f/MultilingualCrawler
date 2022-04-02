@@ -1,0 +1,12 @@
+s://www.tapchicongsan.org.vn/web/guest/chinh-tri-xay-dung-dang	https://www.tapchicongsan.org.vn/web/chinese/quoc-te
+https://www.tapchicongsan.org.vn/vi_VN/web/guest/van_hoa_xa_hoi	https://www.tapchicongsan.org.vn/web/chinese/kinh-te
+https://www.tapchicongsan.org.vn/web/guest/kinh-te	https://www.tapchicongsan.org.vn/web/chinese/van-hoa-xa-hoi
+https://www.tapchicongsan.org.vn/web/guest/quoc-phong-an-ninh-oi-ngoai1	https://www.tapchicongsan.org.vn/web/chinese/quoc-te
+https://www.tapchicongsan.org.vn/web/guest/the-gioi-van-de-su-kien	
+https://www.tapchicongsan.org.vn/web/guest/thuc-tien-kinh-nghiem1		
+https://www.tapchicongsan.org.vn/web/guest/nghien-cu	
+https://www.tapchicongsan.org.vn/web/guest/thong-tin-ly-luan		
+https://www.tapchicongsan.org.vn/web/guest/tieu-diem		
+https://www.tapchicongsan.org.vn/web/guest/quan-triet-va-thuc-hien-nghi-quyet-ai-hoi-xii-cua-ang	
+https://www.tapchicongsan.org.vn/web/guest/hoc-tap-va-lam-theo-tu-tuong-ao-uc-phong-cach-ho-chi-minh1	
+https://www.tapchicongsan.org.vn/web/guest/trang-thong-tin-dia-phuong	

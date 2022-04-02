@@ -101,9 +101,10 @@ def getVnanetLink(html, list_):
             href_array = link.attrs['href'].split("/")
             href_array[4] = urllib.parse.quote_plus(href_array[4])
 
-            crawl_link = "{}//{}/{}/{}/{}".format(href_array[0], href_array[2], href_array[3], href_array[4],
-                                                  href_array[5])
-            crawl_link = urllib.parse.quote_plus(crawl_link)
+            crawl_link = "{}/{}/{}".format( href_array[3], href_array[4], href_array[5])
+
+            crawl_link = "{}//{}/{}".format(href_array[0], href_array[2],crawl_link)
+            #crawl_link = urllib.parse.quote_plus(crawl_link)
             time = array_time[count].text.split(" ")[0]
 
             title = all_title[count].text
@@ -185,7 +186,8 @@ def getNhanDanLink(html, language):
         base_url = "https://cn.nhandan.com.vn/"
 
     for div in articles:
-        if language == "lo":
+        if language == "zh":
+
             if (div.h3 == None):
                 continue
 
@@ -276,7 +278,7 @@ def getVietNamPlusLink_Date_Titile(html, link):
                     if (lang != "vi"):
                         time = time.replace('年', '-').replace('月', '-').replace('日', ' ')
                         time = dt.datetime.strptime(time, '%Y-%m-%d %H:%M')
-                        time = time.strftime("%d-%m-%Y")
+                        time = time.strftime("%d/%m/%Y")
                     else:
                         # pdb.set_trace()
                         time = dt.datetime.strptime(time, '%d/%m/%Y - %H:%M')
@@ -300,7 +302,7 @@ def getVietNamPlusLink_Date_Titile(html, link):
     return list_link
 
 def getTapChiCongSanLink(driver, link, list_, first=True):
-    driver.get(link)
+
     index = 1
     list_link = list()
 
@@ -336,7 +338,7 @@ def getTapChiCongSanLink(driver, link, list_, first=True):
         li_tags = div.find_elements_by_xpath(".//li")
 
         next_page = 0
-
+        time.sleep(1)
         for li in li_tags:
             a_tag = li.find_element_by_xpath(".//a")
 
@@ -356,8 +358,28 @@ def getTapChiCongSanLink(driver, link, list_, first=True):
 
         if (Ended):
             break
-    driver.close()
+
     return list_link
+
+def getBCCLink(html, listLink):
+    base_url = "https://www.bbc.com/"
+    soup = BeautifulSoup(html, "lxml")
+    articles = soup.findAll("article", class_="qa-post")
+
+    if not articles:
+
+        return list()
+
+    list_link = list()
+    for article in articles:
+        url = "{}{}".format(base_url,article.a.attrs['href'])
+        title = article.a.text
+
+        if url in list_link and url in listLink:
+            continue
+        list_link.append({"url": url, "title": title})
+
+    return  list_link
 
 def enlist_talk_names(path, dict_, src_lang_, tgt_lang_):
     status = False

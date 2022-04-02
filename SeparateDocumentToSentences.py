@@ -2,7 +2,19 @@ import pdb
 import re
 
 import Utility
-import  Punctuation
+
+def getPunctuationForLanguage(language):
+    """
+        :return Punctuation in dictionary follow language
+        :key Vietnamese punctuation
+        :var Language destination punctuaction
+    """
+    if(language == "km"):
+        return {".": "\u17d4", "?": "\uff1f", "!": "\uff01", ";": ";", "...": "\u2026"}
+    if(language == "zh"):
+        return {".": "\u3002", "?": "?", "!": "!", ";": "；", "...": "..."}
+
+    return {".": ".", "?": "?", "!": "!", ";": ";", "...": "..."}
 
 def slpit_text_by_sign(text, sign):
     list_text = text.split(sign);
@@ -147,6 +159,6 @@ def saveTestFile(list_sentence):
 
 
 if __name__ == '__main__':
-    map_ = Punctuation.getPunctuationForLanguage("lo")
+    map_ = getPunctuationForLanguage("lo")
     text = "ທ່ານນາງ Kamala Harris ຢັ້ງຢືນວ່າ ການພົວພັນຮ່ວມມືຫວຽດນາມ-ອາເມລິກາ ໃນຂົງເຂດເສດຖະກິດ, ຄວາມໝັ້ນຄົງພວມເພີ່ມທະວີ; ee;  "
     print(slpit_text(text, list_sign=list(map_.keys())))

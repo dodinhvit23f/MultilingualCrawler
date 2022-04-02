@@ -1,60 +1,38 @@
 import pdb
 import time
 import urllib
-from multipledispatch import dispatch
-from selenium.webdriver.support.ui import WebDriverWait
-import ChromeDriver
 import Utility
 import configparser
+from deep_translator import  GoogleTranslator
 
-def translate(driver, src_lang, tgt_lang, list_text):
+def translate(src_lang, tgt_lang, list_text):
     list_transed_text = list()
-    # sl la nguon ngu nguon
-    # tl la nguon ngu dich
-
-    count = 1
-    search_text = ""
-    sign = ";"
-    # f = open("link.test.txt", "w", encoding="utf-8")
-    loop = 1
-
-    print(len(list_text))
-    try:
-        for text in list_text:
-            rawtext = text
-            text = text.replace("?", "").replace(".", "？").replace(".", "")
-            print(loop)
-            if( loop % 800 == 0):
-                driver.delete_all_cookies()
-            while (True):
-                time.sleep(1.5)
+    googleTranslator = GoogleTranslator(source=tgt_lang, target=src_lang)
+    time_except = 360
+    for text in list_text:
+        while(True):
+            try:
+                rawtext = text
                 text = text.replace("?", "").replace(".", "？").replace(".", "")
-                #
-                # pdb.set_trace()
-                search_text = urllib.parse.quote_plus(text)
-
-                # search_text = urllib.parse.quote_plus(search_text)
-                url = "https://translate.google.com/?sl={}&tl={}&text={}&op=translate".format(tgt_lang, src_lang,
-                                                                                              search_text)
-                driver.get(url)
-
-                content_translate_text = WebDriverWait(driver, 5).until(
-                    lambda driver: driver.find_element_by_class_name('J0lOec'))
-
-                list_ = content_translate_text.text.replace("\n", "")
+                list_ = googleTranslator.translate(text)
                 if (tgt_lang != "zh-CN"):
                     list_transed_text.append({src_lang: list_, tgt_lang: rawtext})
                 else:
                     list_transed_text.append({src_lang: list_, "zh": rawtext})
+                print(list_)
                 break
-            print(list_)
 
-            loop = loop + 1
-    except Exception as e:
-        print(e)
-        time.sleep(3)
-        pass
-        # f.close()
+            except Exception as e:
+                print(e)
+
+                if time_except == 0:
+                    break
+
+                time_except = time_except - 1
+                time.sleep(2)
+                pass
+        if time_except == 0:
+            break
 
     return list_transed_text
 
@@ -68,6 +46,10 @@ def sentencesAlignment(src_source, tgt_source, tgt_lang):
     payload = Utility.objectToJson({"type": config.get(tgt_lang, 'api.type'),
                                     "source": src_source,
                                     "target": tgt_source})
+    if tgt_lang == "km":
+        payload = Utility.objectToJson({"type": config.get(tgt_lang, 'api.type'),
+                                        "doc_source": src_source,
+                                        "doc_target": tgt_source})
     headers = {
         'Content-Type': 'application/json'
     }
@@ -83,12 +65,11 @@ def sentencesSegmentation(src_source, tgt_lang):
     payload = Utility.objectToJson({"type":tgt_lang,
                                     "source": src_source})
     headers = { 'Content-type': 'application/json; charset=utf-8'}
-
-    response = requests.request("POST",  config.get('segmentation','api.url'), headers=headers, data=payload.encode("utf-8"))
     try:
+        response = requests.request("POST",  config.get('segmentation','api.url'), headers=headers, data=payload.encode("utf-8"), timeout=3)
         data = Utility.stringJsonToOject(response.text)
+        response.close()
     except:
         return src_source
+    time.sleep(0.001)
     return data['data']
-
-#sentencesAlignment("kiểm tra", "ກວດສອບ", "lo")

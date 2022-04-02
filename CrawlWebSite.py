@@ -1,10 +1,8 @@
 import os
 import pdb
-
 import ChromeDriver
 import ConvertHtmlToText
 import PageContent
-import Punctuation
 import SaveFile
 import SentenceAlign
 import time
@@ -12,7 +10,7 @@ import datetime
 import AlignmentNews
 import SeparateDocumentToSentences
 import Utility
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import TimeoutException
 
 class BaseWebsite:
 
@@ -34,18 +32,24 @@ class BaseWebsite:
         if language not in self.accept_language:
             raise Exception("Resource not supported")
 
-    def checkForLatestNews(self, driver , link=None, link_crawled=list(), first=True):
-        return self.getWebsiteLink(driver = driver,link=link, list_=link_crawled, first=first)
+    def checkForLatestNews(self, driver, link=None, link_crawled=list(), first=True, language="vi"):
+        return self.getWebsiteLink(driver=driver, link=link, list_=link_crawled, first=first, language=language)
 
     def getNewsContent(self, driver, link, language):
+        while(True):
+            try:
+                driver.get(link)
+                break
+            except TimeoutException:
+                time.sleep(2)
+                driver.get(link)
 
-        driver.get(link)
         html = driver.page_source
 
         if self.name == "Vov":
             return PageContent.getVovNewsContent(html)
-        if self.name == "QDND":
-            return PageContent.getQuanDoiNhanDan(html, language)
+        if self.name == "BCC":
+            return PageContent.getBCCNewContent(html)
         if self.name == "Vnanet":
             return PageContent.getVnanetNewsContet(html)
         if self.name == "VietNamPlus":
@@ -56,6 +60,8 @@ class BaseWebsite:
             return PageContent.getNhanDanNewsContent(html, language)
         if self.name == "TapchiCongSan":
             return PageContent.getTapChiCongSanConntent(html, language)
+        if self.name == "QDND":
+            return PageContent.getQuanDoiNhanDan(html, language)
 
     def bilingualNews(self, type, src_link, tgt_link, tgt):
         print("sort data")
@@ -64,22 +70,30 @@ class BaseWebsite:
 
         print("find bilingual")
         if (type == "date"):
-            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8)
+            return SentenceAlign.AlignByTitleAndDateNews(src_link, tgt_link, tgt=tgt, annotator=annotator, score_lim=0.1, score=0.8)
         if (type == "title"):
-            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, tgt=tgt, score_lim=0.1, score=0.8)
+            return SentenceAlign.AlignByTitleNews(src_link, tgt_link, tgt=tgt, annotator=annotator, score_lim=0.1, score=0.8)
 
     def saveDocument(self, driver, src_link, tgt_link, tgt_lang, document_folder):
         file_name = src_link.split("/")
-        file_name = file_name[len(file_name) - 1]
-        file_name = file_name[int(len(file_name) / 2):]
+
+
+        if self.name == "NhanDan":
+            file_name = file_name[len(file_name) - 2]
+            file_name = file_name[int(len(file_name) / 2):]
+        else:
+            file_name = file_name[len(file_name) - 1]
+            file_name = file_name[int(len(file_name) / 2):]
+
+        print(file_name)
 
         if os.path.isfile(os.path.join(document_folder, file_name + ".{}.txt".format("vi"))):
             return
-
+        #.set_trace()
         src_document = self.getNewsContent(driver, src_link, language="vi")
         tgt_document = self.getNewsContent(driver, tgt_link, language=tgt_lang)
 
-        vi_punctuation = list(Punctuation.getPunctuationForLanguage("en").keys())
+        vi_punctuation = list(SeparateDocumentToSentences.getPunctuationForLanguage("en").keys())
 
         src_document = Utility.formatSentence(src_document)
         tgt_document = Utility.formatSentence(tgt_document)
@@ -87,7 +101,7 @@ class BaseWebsite:
         src_document = SeparateDocumentToSentences.slpit_text(src_document, vi_punctuation)
         tgt_document = AlignmentNews.sentencesSegmentation(tgt_document, tgt_lang)
 
-        print(file_name)
+
         SaveFile.saveDocument(src_text=src_document, tgt_text=tgt_document,
                               file_path=os.path.join(document_folder, file_name), src_lang_="vi",
                               tgt_lang_=tgt_lang)
@@ -102,8 +116,100 @@ class BaseWebsite:
         if (type == "date"):
             lict_dict.sort(key=lambda x: datetime.datetime.strptime(x.get('date'), "%d/%m/%Y"), reverse=True)
         if (type == "title"):
-            lict_dict.sort(key=lambda x: len(x.get('title').strip()), reverse=True)
-            lict_dict.reverse()
+            lict_dict.sort(key=lambda x: len(x.get('title').strip()) and x.get('title') , reverse=True)
+
+    def getWebsiteLink(self, driver, link, list_=list(), first=True, language='vi'):
+        """
+        :param link:    link to craw
+        :param list_: list link crawled
+        :param first: first time crawl
+        :return:
+        """
+
+        run = True
+        index = 1
+        step = 1
+
+        if self.name == "NhanDan" and language == 'zh':
+            step = 15
+            index = 0
+
+        return_list = list()
+
+        if self.name == "TapchiCongSan":
+            driver.get(link)
+
+            return ConvertHtmlToText.getTapChiCongSanLink(driver=driver, link=link, list_=list_, first=first)
+        if self.name == "Vnanet":
+            driver.get(link.format(index))
+            html = ConvertHtmlToText.getVnanetParagragh(driver)
+            return list_ + ConvertHtmlToText.getVnanetLink(html, list_)
+        while (run):
+
+            time.sleep(1.5)
+
+            not_timeout = True
+            while (not_timeout):
+                try:
+                    # pdb.set_trace()
+                    driver.get(link.format(index))
+                    not_timeout = False
+                except TimeoutException as ex:
+                    time.sleep(4)
+
+            html = driver.page_source
+            if self.name == "Vov":
+                list_link = ConvertHtmlToText.getVovLink(html)
+            if self.name == "QDND":
+                list_link = ConvertHtmlToText.getQDNDLink(driver, html)
+            if self.name == "VietLao":
+                list_link = ConvertHtmlToText.getVietNamVietLaoLink(html)
+            if self.name == "VietNamPlus":
+                list_link = ConvertHtmlToText.getVietNamPlusLink_Date_Titile(html, link)
+            if self.name == "NhanDan":
+                list_link = ConvertHtmlToText.getNhanDanLink(html=html, language=language)
+            if self.name == "BCC":
+                list_link = ConvertHtmlToText.getBCCLink(html=html, listLink=list_)
+            if list_link == None:
+                time.sleep(3)
+                continue
+
+            if not list_link:
+                run = False
+
+            lim = len(list_link)
+
+            for dict in list_link:
+                for crawled_link in return_list:
+                    if crawled_link['url'] == dict['url']:
+                        # pdb.set_trace()
+                        lim = lim - 1
+                        break
+
+            if (lim == 0):
+                break
+
+            hadIt = False
+            for dict in list_link:
+
+                for crawled in list_:
+                    if dict['url'] == crawled['url']:
+                        hadIt = True
+                        break
+                # pdb.set_trace()
+                if not hadIt:
+                    return_list.append(dict)
+                    continue
+
+                if not first and hadIt:
+                    run = False
+                    break
+                if first and hadIt:
+                    continue
+
+            index = index + step
+
+        return list_ + return_list
 
     def auto_crawl_website(self, target_lang, type="date"):
         resource_lang = "vi"
@@ -111,7 +217,7 @@ class BaseWebsite:
         self.crawlWithLanguage(target_lang)
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        map_punctuation = Punctuation.getPunctuationForLanguage(target_lang)
+        map_punctuation = SeparateDocumentToSentences.getPunctuationForLanguage(target_lang)
         _case = {"TH1": 0, "TH2": 1}
 
         sentence_folder = current_dir + "/Data/crawler_success/{}/{}-{}/Sentence/".format(self.name, resource_lang,
@@ -150,10 +256,12 @@ class BaseWebsite:
             src_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}/link.txt".format(resource_lang))
         if os.path.isfile(crawl_folder + "/link/{}/link.txt".format(target_lang)):
             tgt_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}/link.txt".format(target_lang))
+
         print("Vi : {}".format(len(src_link)))
-        print("{} : {}".format(target_lang,len(tgt_link)))
+        print("{} : {}".format(target_lang, len(tgt_link)))
 
         driver = ChromeDriver.getChromeDriver()
+        driver.set_page_load_timeout(200)
 
         for folder in list_resource_folder:
             print(folder)
@@ -183,10 +291,11 @@ class BaseWebsite:
             for line in array_link:
                 if line[0] != "" and line[0] != " ":
                     src_link = self.checkForLatestNews(driver=driver,link=line[0], link_crawled=src_link, first=first_source)
-
+            
             for line in array_link:
                 if line[1] != "" and line[1] != " ":
-                    tgt_link = self.checkForLatestNews(driver=driver,link=line[1], link_crawled=tgt_link, first=first_tgt)
+                    tgt_link = self.checkForLatestNews(driver=driver, link=line[1], link_crawled=tgt_link,
+                                                first=first_tgt, language=target_lang)
 
         if src_link:
             SaveFile.saveJsonFile(
@@ -201,17 +310,16 @@ class BaseWebsite:
         if os.path.isfile(crawl_folder + "/link/{}/title.txt".format(target_lang)):
             list_tgt_title = SaveFile.loadJsonFile(crawl_folder + "/link/{}/title.txt".format(target_lang))
 
+        print("Bắt đầu dịch title: ")
         if not os.path.isfile(crawl_folder + "/link/{}/title.txt".format(target_lang)):
             temp = tgt_link.copy()
             for x in temp:
                 list_tgt_title.append(x["title"])
 
             if (target_lang == 'zh'):
-                list_translate = AlignmentNews.translate(driver, "vi", 'zh-CN', list_tgt_title)
-                print()
+                list_translate = AlignmentNews.translate("vi", 'zh', list_tgt_title)
             else:
-                list_translate = AlignmentNews.translate(driver, "vi", target_lang, list_tgt_title)
-                print()
+                list_translate = AlignmentNews.translate("vi", target_lang, list_tgt_title)
 
             SaveFile.saveJsonFile(crawl_folder + "/link/{}/title.txt".format(target_lang), link_dict=list_translate)
 
@@ -226,9 +334,9 @@ class BaseWebsite:
                     try:
                         if (temp[start]['title'] == title[target_lang]):
                             del (temp[start])
-                            break
                     except:
-                        pdb.set_trace()
+
+                        pass
                     start = start + 1
 
             list_trans = list()
@@ -237,120 +345,44 @@ class BaseWebsite:
                 list_trans.append(x["title"])
 
             if (target_lang == 'zh'):
-                list_tgt_title += AlignmentNews.translate(driver, "vi", 'zh-CN', list_trans)
+                list_tgt_title += AlignmentNews.translate("vi", 'zh', list_trans)
             else:
-                list_tgt_title += AlignmentNews.translate(driver, "vi", target_lang, list_trans)
+                list_tgt_title += AlignmentNews.translate("vi", target_lang, list_trans)
 
             SaveFile.saveJsonFile(crawl_folder + "/link/{}/title.txt".format(target_lang), link_dict=list_tgt_title)
-
         list_tgt_title = SaveFile.loadJsonFile(crawl_folder + "/link/{}/title.txt".format(target_lang))
 
         for link in tgt_link:
             start = 0
             lim = len(list_tgt_title)
             while (start < lim):
+
                 if link["title"] == list_tgt_title[start][target_lang]:
                     link["title"] = list_tgt_title[start][resource_lang]
                     del (list_tgt_title[start])
                     break
+                start = start + 1
 
-        pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link, tgt=target_lang)
-        pdb.set_trace()
+        
+        global annotator
+        print("gióng hàng title: ")
+       
+        pair_link = self.bilingualNews(type, src_link=src_link, tgt_link=tgt_link, tgt=target_lang, annotator=annotator)
+
         if not os.path.exists(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang)):
             os.makedirs(crawl_folder + "/link/{}-{}".format(resource_lang, target_lang))
-
-        SaveFile.saveJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang), pair_link)
+        if pair_link:
+            SaveFile.saveJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang), pair_link)
 
         pair_link = SaveFile.loadJsonFile(crawl_folder + "/link/{}-{}/link.txt".format(resource_lang, target_lang))
-
+        driver.set_page_load_timeout(50)
+        print("Bắt dầu tải xuống")
         for link in pair_link:
             self.saveDocument(driver, link[resource_lang], link[target_lang], target_lang, document_folder)
 
         driver.delete_all_cookies()
         driver.close()
 
-    def getWebsiteLink(self, driver, link, list_=list(), first=True ,language = 'vi'):
-        """
-        :param link:    link to craw
-        :param list_: list link crawled
-        :param first: first time crawl
-        :return:
-        """
-        run = True
-        index = 1
-        step = 1
+from CocCocTokenizer import PyTokenizer
 
-        if self.name == "NhanDan" and language == 'lo':
-            step = 15
-            index = 15
-
-        return_list = list()
-
-        if self.name == "TapchiCongSan":
-            return ConvertHtmlToText.getTapChiCongSanLink(driver=driver, link=link, list_=list_, first=first)
-        if self.name == "Vnanet":
-            driver.get(link.format(index))
-            html = ConvertHtmlToText.getVnanetParagragh(driver)
-            return list_ + ConvertHtmlToText.getVnanetLink(html, list_)
-        while(run):
-
-            time.sleep(2)
-            #pdb.set_trace()
-
-            driver.get(link.format(index))
-
-            html = driver.page_source
-            if self.name == "Vov":
-                list_link = ConvertHtmlToText.getVovLink(html)
-            if self.name == "QDND":
-                list_link = ConvertHtmlToText.getQDNDLink(driver, html)
-            if self.name == "VietLao":
-                list_link = ConvertHtmlToText.getVietNamVietLaoLink(html)
-            if self.name == "VietNamPlus":
-                list_link = ConvertHtmlToText.getVietNamPlusLink_Date_Titile(html,link)
-            if self.name == "NhanDan":
-                list_link = ConvertHtmlToText.getNhanDanLink(html=html, language=language)
-
-            if list_link == None:
-                time.sleep(3)
-                continue
-            if not list_link:
-                run = False
-
-
-            lim = len(list_link)
-
-
-            for dict in list_link:
-                for crawled_link in return_list:
-                    if crawled_link['url'] == dict['url']:
-                        # pdb.set_trace()
-                        lim = lim - 1
-                        break
-
-            if(lim == 0):
-                break
-
-            hadIt = False
-            #pdb.set_trace()
-            for dict in list_link:
-
-                for crawled in list_:
-                    if dict['url'] == crawled['url']:
-                        hadIt = True
-                        break
-                #pdb.set_trace()
-
-                if not hadIt:
-                    return_list.append(dict)
-                    continue
-
-                if not first and hadIt:
-                    run = False
-                    break
-                if first and hadIt:
-                    continue
-
-            index = index + step
-
-        return list_ + return_list
+annotator = PyTokenizer(load_nontone_data=True)

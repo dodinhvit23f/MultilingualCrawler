@@ -17,6 +17,10 @@ if __name__ == '__main__':
 
     parser = parse_arguments(sys.argv[1:])
 
+    if not parser.web:
+        print("Hay nhap trang web")
+        exit()
+
     if parser.web == "vov":
         web = BaseWebsite("Vov", "VovCrawler", ["en", "ja", "km", "zh", "lo", "vi"])
         web.auto_crawl_website(parser.tgt_lang)
@@ -37,5 +41,8 @@ if __name__ == '__main__':
         web.auto_crawl_website(parser.tgt_lang, type="title")
     if parser.web == "nhandan":
         web = BaseWebsite("NhanDan", "NhanDanCrawler", ["vi", "zh",'en'])
+        web.auto_crawl_website(parser.tgt_lang, type="title")
+    if parser.web == "bcc":
+        web = BaseWebsite("BCC", "BCCCrawler", ["vi", "zh"])
         web.auto_crawl_website(parser.tgt_lang, type="title")
 

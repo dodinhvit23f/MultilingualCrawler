@@ -1,7 +1,24 @@
 from bs4 import BeautifulSoup
 import Utility
 import pdb
-from requests_html import HTMLSession
+
+def getTextFromTags(html, tag):
+    soup = BeautifulSoup(html, "lxml")
+    text = ""
+
+    for tag_text in soup.findAll(tag):
+
+        tagText = Utility.formatString(tag_text.text)
+        tagText = tagText.replace("\n+", " ")
+        tagText = tagText.replace("/.", "")
+        tagText = tagText.strip()
+        # ký tự lạ xuất hiện tại một số bài báo
+
+        if tagText and not tagText == "":
+            text += tagText
+
+    text =  bytes(text, "utf-8").decode('utf-8', 'ignore')
+    return text
 
 def getTextFromTagsWithClass(html, tag, class_):
     soup = BeautifulSoup(html, "lxml")
@@ -72,7 +89,13 @@ def getVietLaoVietNamNewsContent(html):
     return getTextFromTagsWithClass(html, tag="div", class_="post")
 
 def getVietNamPlusNewsContent(html):
-    return getTextFromTagsWithClass(html, "div", "article-body")
+
+    div = getTextFromTagsWithClass(html, "div", "article-body")
+    if not div:
+        div = getTextFromTagsWithClass(html, "div", "details")
+    if not div:
+        div = getTextFromTagsWithId(html, "div", "page")
+    return div
 
 def getTNUNewsContent(html, lang = "vi"):
     content = ""
@@ -109,10 +132,14 @@ def getNhanDanNewsContent(html, lang = "vi"):
 
     return getTextFromTagsWithClass(html, "div", "detail-page")
 
+def getBCCNewContent(html):
+   return getTextFromTags(html, "main")
+
 def getTapChiCongSanConntent(html, lang = "vi"):
 
     if lang == "vi":
         return getTextFromTagsWithClass(html, "div", "ContentDetail")
 
     return getTextFromTagsWithClass(html, "div", "journal-content-article")
+
 #print(getQuanDoiNhanDan(requests.get("https://kh.qdnd.vn/preview/pid/27/newid/513765").content, lang= "km"))

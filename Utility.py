@@ -77,7 +77,6 @@ def formatSentence(text):
     text = re.sub("./", " ", text)
     text = re.sub("•", "", text)
     text = re.sub("\”", "", text)
-    text = re.sub("", "", text)
     text = re.sub("\t+", " ", text)
     text = re.sub(' +', " ", text)
     text = re.sub("[\n]+?[ ]+?[\n]+", "\n", text)

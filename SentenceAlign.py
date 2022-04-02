@@ -1,12 +1,12 @@
-import numpy.linalg
-from vncorenlp import VnCoreNLP
 import pdb
 import re
-import numpy as np
 import math
 import datetime
 import random
 import sys
+import  time
+from CocCocTokenizer import PyTokenizer
+import numpy as np
 
 vector = dict()
 list_stopwords = list()
@@ -70,7 +70,7 @@ def wordToVector(word):
     if word in vector:
         return vector[word]
     else:
-        return random.randrange(1000, 20000)
+        return 100
 
 def TF_IDF(src_sentence, tgt_sentence):
     dict_words = {}
@@ -87,35 +87,6 @@ def TF_IDF(src_sentence, tgt_sentence):
 
 
     tf_idf_sorce = cosineSinmilar(TF_IDF_Vector(dict_words, dict_src), TF_IDF_Vector(dict_words, dict_tgt))
-
-    if tf_idf_sorce > 0.97:
-        return tf_idf_sorce
-    """
-    if len(dict_tgt) > len(dict_src):
-        size = len(dict_tgt)
-    else:
-        size = len(dict_src)
-    
-    x = DissSimilarVector(dict_src, dict_tgt, size)
-    x2 = DissSimilarVector(dict_tgt, dict_src, size)
-    
-    distance = cosineSinmilar(x, x2)
-    print(distance)
-    sorce = 0.0
-
-    if distance >0.2 and distance < 0.3:
-        sorce = 0.025
-
-    if distance >0.4 and distance < 0.6:
-        sorce = 0.035
-
-    if distance >0.6 and distance < 0.8:
-        sorce = 0.04
-
-    if distance >0.8:
-        sorce = 0.045
-    """
-
     return  tf_idf_sorce
 
 def TF_IDF_CountWords(dict_words, dict_, words):
@@ -158,51 +129,27 @@ def TF_IDF_Vector(dict_words, dict_src):
                 vector[start] = 1
             else:
                 vector[start] = dict_src[word]
-        else:
-            vector[start] = -.65
+            start = start + 1
+            continue
+        vector[start] = -.65
         start = start + 1
     return vector
 
-def DissSimilarVector(dict_src, dict_tgt,size):
-    vector = np.ones(size)
+def sentenceToTokenize(sentences, annotator):
+    word_segmented_text = annotator.word_tokenize(sentences, tokenize_option=0)
+    return [x.lower() for x in word_segmented_text]
 
-    start = 0
-    # for each word not in dict_tgt
-    for word_src in dict_src:
+def preprocessSentence(sentences, annotator):
 
-        if word_src not in dict_tgt:
-            vector[start] = -wordToVector(word_src)
-            print(wordToVector(word_src))
-            start += 1
-            continue
+    sentence = sentences.strip()
+    sentence = re.sub("[!.,@#$%^&*()?<>“:]+", "", sentence)
+    sentence = re.sub("[-]+", " ", sentence)
+    sentence = re.sub("\s+", " ", sentence)
 
-        vector[start] = wordToVector(word_src)
-        start += 1
-    print(vector)
-    return vector
+    words = sentenceToTokenize(sentence, annotator)
+    return removeStopWord(words)
 
-def sentenceToTokenize(sentences):
-    global annotator
-    flag = False
-
-    word_segmented_text = annotator.tokenize(sentences)
-    tokenSentence = ""
-
-    for sentence in word_segmented_text[0]:
-        if(sentence !="" or sentence!= "" ):
-            if(sentence == "_"):
-                tokenSentence = tokenSentence.strip() + sentence
-                flag = True
-                continue
-            if flag:
-                flag = False
-                tokenSentence = tokenSentence + sentence
-                continue
-            tokenSentence = tokenSentence + " " + sentence
-
-    return tokenSentence.strip()
-
-def preprocessString(list_dict_src, token=True):
+def preprocessString(list_dict_src, annotator, token=True):
     start = 0
     length = len(list_dict_src)
 
@@ -211,24 +158,28 @@ def preprocessString(list_dict_src, token=True):
         sentence = list_dict_src[start]['title']
 
         sentence = sentence.strip()
-        sentence = re.sub("[!.,@#$%^&*()?<>“]+", "", sentence)
+        sentence = re.sub("[!.,@#$%^&*()?<>“:]+", "", sentence)
         sentence = re.sub("[-]+", " ", sentence)
         sentence = re.sub("\s+", " ", sentence)
 
         if(token):
-            sentence = sentenceToTokenize(sentence)
-        sentence = sentence.lower()
+            words = sentenceToTokenize(sentence, annotator)
+       
         list_dict_src[start]['title'] = sentence
         if (token):
-            list_dict_src[start]["words"] = removeStopWord(sentence.split(" "))
+            list_dict_src[start]["words"] = removeStopWord(words)
         else:
             list_dict_src[start]["words"] = sentence.split(" ")
         start = start + 1
 
+
+def cosine(x, y):
+    cos_sim = np.dot(x, y)/(np.linalg.norm(x)*np.linalg.norm(y))
+    return cos_sim
 """
 Align News By Title And Date
 """
-def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, score_lim=0.4, score=0.8, token=True):
+def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, annotator, date_range=20, score_lim=0.4, score=0.8, token=True):
     """
 
     :param list_dict_src: danh sách các dictionary chứa link, date, title ngôn ngữ nguồn
@@ -249,8 +200,8 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
         tgt_datetime = datetime.datetime.strptime(link['date'], "%d/%m/%Y")
         link['date'] = tgt_datetime
 
-    preprocessString(list_dict_src, token=token)
-    preprocessString(list_dict_tgt, token=token)
+    preprocessString(list_dict_src, annotator, token=token )
+    preprocessString(list_dict_tgt, annotator, token=token)
     print("Preprocessing title new")
     lim_src = len(list_dict_src)
     lim_tgt = len(list_dict_tgt)
@@ -323,7 +274,7 @@ def AlignByTitleAndDateNews(list_dict_src, list_dict_tgt, tgt, date_range=20, sc
         score = score - 0.1
     return list_align_title
 
-def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0.75, token = True):
+def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, annotator, score_lim=0.35, score=0.75, token = True):
 
     src = "vi"
 
@@ -339,8 +290,9 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0
     lim_src = len(list_dict_src)
     lim_tgt = len(list_dict_tgt)
     print(len(list_dict_src), len(list_dict_tgt))
-    preprocessString(list_dict_src)
-    preprocessString(list_dict_tgt)
+    print("Tien xu ly title")
+    preprocessString(list_dict_src, annotator=annotator)
+    preprocessString(list_dict_tgt, annotator=annotator)
 
     list_align_title = list()
 
@@ -406,17 +358,29 @@ def AlignByTitleNews(list_dict_src, list_dict_tgt , tgt, score_lim=0.35, score=0
 # annotator = VnCoreNLP("<FULL-PATH-to-VnCoreNLP-jar-file>", annotators="wseg", max_heap_size='-Xmx500m')
 loadVectorEmbbeding(vector)
 loadStopWords()
-annotator = VnCoreNLP("./VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner,parse", max_heap_size='-Xmx2g',port=8887)
+
 
 if __name__ == '__main__':
 
     # Input
-    text_origin = "chân bàn"
-    text_trans = "bàn chân"
-    # To perform word segmentation, POS tagging, NER and then dependency parsing
-    #annotated_text = annotator.annotate(text)
-    #print(sentenceToTokenize(text_trans).split(" "))
-    #print(sentenceToTokenize(text_origin).split(" "))
-    print(removeStopWord(sentenceToTokenize(text_trans).split(" ")))
-    print(removeStopWord(sentenceToTokenize(text_origin).split(" ")))
-    print(TF_IDF(removeStopWord(sentenceToTokenize(text_trans).split(" ")), removeStopWord(sentenceToTokenize(text_origin).split(" "))))
+    """
+    text_origin = "Chủ tịch Quốc hội Vương Đình Huệ: Tháo gỡ khó khăn để tỉnh Bến Tre phát triển cùng khu vực Đồng bằng sông Cửu Long"
+    text_trans = "Chủ tịch Quốc hội Vương Đình Huệ: Sự phát triển của tỉnh Bến Tre cùng với Đồng bằng sông Cửu Long ở phía Nam Việt Nam"
+    
+    annotator = PyTokenizer(load_nontone_data=True)
+
+    text_origin = preprocessSentence(text_origin, annotator)
+    text_trans = preprocessSentence(text_trans, annotator)
+
+    print(text_origin)
+    print(text_trans)
+
+    print(TF_IDF(text_origin, text_trans))
+    """
+
+    list_ = [{"title":"Chủ tịch Quốc hội Vương Đình Huệ: Tháo gỡ khó khăn để tỉnh Bến Tre phát triển cùng khu vực Đồng bằng sông Cửu Long"},
+     {"title":"Chủ tịch Quốc hội Vương Đình Huệ: Sự phát triển của tỉnh Bến Tre cùng với Đồng bằng sông Cửu Long ở phía Nam Việt Nam"}]
+
+    annotator = PyTokenizer(load_nontone_data=True)
+    preprocessString(list_, annotator, token=True)
+    print(list_)

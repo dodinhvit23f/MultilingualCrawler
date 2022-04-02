@@ -33,7 +33,7 @@ def saveSentences (src_text, tgt_text, file_path, src_lang_, tgt_lang_):
             f.close()
 
 def saveDocument (src_text, tgt_text, file_path, src_lang_, tgt_lang_):
-
+    file_path = file_path.replace("*","")
     if src_text and tgt_text:
         f = open(file_path + ".{}.txt".format(src_lang_), "w", encoding='utf-8')
         f.write(src_text + "\n")
@@ -101,7 +101,7 @@ def openTranslatedTitle(crawl_folder, tgt_link):
         del (list_trans[start])
 
 def loadJsonFile(file_path):
-    print(file_path)
+
     f = open(file_path, "r", encoding="utf-8")
     for line in f:
         src_link = Utility.stringJsonToOject(line)
